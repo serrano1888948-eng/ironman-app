@@ -2,7 +2,7 @@
   "name": "Triatleta & Bodybuilder",
   "short_name": "IronMan",
   "description": "Programa de treino Projeto Iron Man",
-  "start_url": "/",
+  "start_url": "/ironman-app/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
