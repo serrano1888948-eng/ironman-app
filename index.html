@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronMan">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Triatleta & Bodybuilder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --card: #161616;
+    --border: #272727;
+    --accent: #C8F135;
+    --accent-dim: rgba(200,241,53,0.08);
+    --orange: #FF8C42;
+    --orange-dim: rgba(255,140,66,0.08);
+    --blue: #4d9fff;
+    --blue-dim: rgba(77,159,255,0.08);
+    --purple: #b57aff;
+    --purple-dim: rgba(181,122,255,0.08);
+    --text: #e0e0e0;
+    --muted: #666;
+    --white: #fff;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: #111;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 100;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 12px 4px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn .icon { font-size: 18px; }
+
+  /* SCREENS */
+  .screen { display: none; padding: 0 0 80px; }
+  .screen.active { display: block; }
+
+  /* HEADER */
+  header {
+    padding: 52px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  h1 span { color: var(--accent); }
+
+  /* GRADE SEMANAL */
+  .week-header {
+    padding: 16px 16px 8px;
+  }
+
+  .week-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .week-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 16px 16px;
+  }
+
+  .week-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .week-row.treino-a { border-left: 3px solid var(--accent); }
+  .week-row.treino-b { border-left: 3px solid var(--orange); }
+  .week-row.treino-c { border-left: 3px solid var(--blue); }
+  .week-row.natacao { border-left: 3px solid var(--purple); }
+  .week-row.corrida { border-left: 3px solid #ff6b6b; }
+  .week-row.descanso { border-left: 3px solid var(--border); opacity: 0.6; }
+
+  .week-day {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    width: 36px;
+    flex-shrink: 0;
+  }
+
+  .week-info { flex: 1; }
+
+  .week-activity {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  .week-detail {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .week-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .badge-a { background: var(--accent-dim); color: var(--accent); }
+  .badge-b { background: var(--orange-dim); color: var(--orange); }
+  .badge-c { background: var(--blue-dim); color: var(--blue); }
+  .badge-nat { background: var(--purple-dim); color: var(--purple); }
+  .badge-run { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+  /* TREINO TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 4px;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+  }
+
+  .tab.active-a { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab.active-b { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab.active-c { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab.active-core { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* PANELS */
+  .panel { display: none; padding: 16px; }
+  .panel.active { display: block; }
+
+  /* TREINO HEADER */
+  .treino-header {
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border: 1px solid;
+  }
+
+  .treino-header.a { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
+  .treino-header.b { background: var(--orange-dim); border-color: rgba(255,140,66,0.2); }
+  .treino-header.c { background: var(--blue-dim); border-color: rgba(77,159,255,0.2); }
+  .treino-header.core { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
+
+  .treino-day {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .treino-header.a .treino-day,
+  .treino-header.core .treino-day { color: var(--accent); }
+  .treino-header.b .treino-day { color: var(--orange); }
+  .treino-header.c .treino-day { color: var(--blue); }
+
+  .treino-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .treino-meta {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 12px;
+  }
+
+  /* TABLE */
+  .ex-table { width: 100%; border-collapse: collapse; }
+  .ex-table thead tr { border-bottom: 1px solid var(--border); }
+
+  .ex-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .ex-table th:last-child { text-align: right; }
+  .ex-table tbody tr { border-bottom: 1px solid rgba(39,39,39,0.6); }
+  .ex-table tbody tr:last-child { border-bottom: none; }
+  .ex-table td { padding: 11px 8px; vertical-align: middle; }
+
+  .ex-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    width: 20px;
+  }
+
+  .ex-name { font-size: 13px; font-weight: 600; color: var(--white); }
+
+  .ex-dose {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .ex-fail { font-size: 10px; text-align: right; white-space: nowrap; }
+  .fail-rir { color: #ff6b6b; }
+  .fail-opt { color: var(--orange); }
+  .fail-go { color: var(--accent); }
+
+  .time-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+
+  .time-badge span { color: var(--white); font-weight: 700; }
+
+  .legenda {
+    margin-top: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .leg-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .leg-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .leg-item:last-child { margin-bottom: 0; }
+
+  .leg-dot {
+    flex-shrink: 0;
+    margin-top: 3px;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- GRADE SCREEN -->
+<div id="screen-grade" class="screen active">
+  <header>
+    <span class="tag">Projeto Iron Man · Fase 1</span>
+    <h1>Programa <span>Triatleta & Bodybuilder</span></h1>
+  </header>
+
+  <div class="week-header">
+    <div class="week-title">Grade Semanal</div>
+  </div>
+
+  <div class="week-grid">
+    <div class="week-row treino-a">
+      <div class="week-day">Seg</div>
+      <div class="week-info">
+        <div class="week-activity">Treino A</div>
+        <div class="week-detail">Push + Legs · ~60 min</div>
+      </div>
+      <span class="week-badge badge-a">MUSCULAÇÃO</span>
+    </div>
+
+    <div class="week-row natacao">
+      <div class="week-day">Ter</div>
+      <div class="week-info">
+        <div class="week-activity">Natação</div>
+        <div class="week-detail">VemNadar · Mar aberto</div>
+      </div>
+      <span class="week-badge badge-nat">NATAÇÃO</span>
+    </div>
+
+    <div class="week-row corrida">
+      <div class="week-day">Qua</div>
+      <div class="week-info">
+        <div class="week-activity">Corrida Intensidade</div>
+        <div class="week-detail">Intervalos ou tempo run</div>
+      </div>
+      <span class="week-badge badge-run">CORRIDA</span>
+    </div>
+
+    <div class="week-row treino-b">
+      <div class="week-day">Qui</div>
+      <div class="week-info">
+        <div class="week-activity">Natação + Treino B</div>
+        <div class="week-detail">Natação manhã · Pull + Legs noite · ~55 min</div>
+      </div>
+      <span class="week-badge badge-b">DUPLO</span>
+    </div>
+
+    <div class="week-row corrida">
+      <div class="week-day">Sex</div>
+      <div class="week-info">
+        <div class="week-activity">Corrida Leve</div>
+        <div class="week-detail">Z2 · Ritmo confortável</div>
+      </div>
+      <span class="week-badge badge-run">CORRIDA</span>
+    </div>
+
+    <div class="week-row treino-c">
+      <div class="week-day">Sáb</div>
+      <div class="week-info">
+        <div class="week-activity">Treino C</div>
+        <div class="week-detail">Full Upper · ~55 min</div>
+      </div>
+      <span class="week-badge badge-c">MUSCULAÇÃO</span>
+    </div>
+
+    <div class="week-row corrida">
+      <div class="week-day">Dom</div>
+      <div class="week-info">
+        <div class="week-activity">Long Run</div>
+        <div class="week-detail">Z2 · Treino mais longo da semana</div>
+      </div>
+      <span class="week-badge badge-run">CORRIDA</span>
+    </div>
+  </div>
+
+  <footer>
+    <span>PROJETO IRON MAN · 2026</span>
+    <span>Reavalia em 8–12 semanas</span>
+  </footer>
+</div>
+
+<!-- TREINO SCREEN -->
+<div id="screen-treino" class="screen">
+  <header>
+    <span class="tag">Projeto Iron Man · Fase 1</span>
+    <h1>Programa <span>Triatleta & Bodybuilder</span></h1>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active-a" onclick="showPanel('a',this)">Treino A</button>
+    <button class="tab" onclick="showPanel('b',this)">Treino B</button>
+    <button class="tab" onclick="showPanel('c',this)">Treino C</button>
+    <button class="tab" onclick="showPanel('core',this)">Core</button>
+  </div>
+
+  <!-- TREINO A -->
+  <div id="pa" class="panel active">
+    <div class="treino-header a">
+      <div class="treino-day">Segunda-feira</div>
+      <div class="treino-name">Push + Legs</div>
+      <div class="treino-meta"><span>7 exercícios</span><span>~60 min</span></div>
+    </div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Exercício</th>
+          <th style="text-align:center">Séries × Reps</th>
+          <th>Falha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="ex-num">1</td><td><div class="ex-name">Back Squat</div></td><td class="ex-dose">4 × 4–6</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">2</td><td><div class="ex-name">RDL com Barra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">3</td><td><div class="ex-name">Supino Inclinado com Halteres</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">4</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr><td class="ex-num">5</td><td><div class="ex-name">Crucifixo no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+        <tr><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+        <tr><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~60 min</span></div>
+    <div class="legenda">
+      <div class="leg-title">Legenda</div>
+      <div class="leg-item"><span class="leg-dot fail-rir">RIR</span><span>Para 1–2 reps antes da falha.</span></div>
+      <div class="leg-item"><span class="leg-dot fail-opt">OPT</span><span>Última série até a falha — opcional.</span></div>
+      <div class="leg-item"><span class="leg-dot fail-go">FALHA</span><span>Última série vai até a falha.</span></div>
+    </div>
+  </div>
+
+  <!-- TREINO B -->
+  <div id="pb" class="panel">
+    <div class="treino-header b">
+      <div class="treino-day">Quinta-feira · Após natação</div>
+      <div class="treino-name">Pull + Legs</div>
+      <div class="treino-meta"><span>7 exercícios</span><span>~55 min</span></div>
+    </div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Exercício</th>
+          <th style="text-align:center">Séries × Reps</th>
+          <th>Falha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="ex-num">1</td><td><div class="ex-name">RDL com Barra</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">2</td><td><div class="ex-name">Front Squat</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">3</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">4</td><td><div class="ex-name">Remada Curvada com Barra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">5</td><td><div class="ex-name">Puxada Aberta</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr><td class="ex-num">6</td><td><div class="ex-name">Remada Baixa no Cabo</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr><td class="ex-num">7</td><td><div class="ex-name">Cadeira Extensora</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~55 min</span></div>
+  </div>
+
+  <!-- TREINO C -->
+  <div id="pc" class="panel">
+    <div class="treino-header c">
+      <div class="treino-day">Sábado</div>
+      <div class="treino-name">Full Upper</div>
+      <div class="treino-meta"><span>7 exercícios</span><span>~55 min</span></div>
+    </div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Exercício</th>
+          <th style="text-align:center">Séries × Reps</th>
+          <th>Falha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="ex-num">1</td><td><div class="ex-name">Supino Inclinado com Halteres</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">2</td><td><div class="ex-name">Paralelas</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr><td class="ex-num">3</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr><td class="ex-num">4</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr><td class="ex-num">5</td><td><div class="ex-name">Remada Curvada com Barra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+        <tr><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~55 min</span></div>
+  </div>
+
+  <!-- CORE -->
+  <div id="pcore" class="panel">
+    <div class="treino-header core">
+      <div class="treino-day">Em casa · Noite</div>
+      <div class="treino-name">Core Essencial</div>
+      <div class="treino-meta"><span>2 exercícios</span><span>~10 min</span><span>Sem equipamento</span></div>
+    </div>
+    <table class="ex-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Exercício</th>
+          <th style="text-align:center">Séries × Reps</th>
+          <th>Obs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="ex-num">1</td>
+          <td><div class="ex-name">Hollow Body Hold</div></td>
+          <td class="ex-dose">3 × 20s</td>
+          <td class="ex-fail" style="color:var(--blue);font-size:10px;text-align:right;">até 40s</td>
+        </tr>
+        <tr>
+          <td class="ex-num">2</td>
+          <td><div class="ex-name">Dead Bug</div></td>
+          <td class="ex-dose">3 × 8</td>
+          <td class="ex-fail" style="color:var(--blue);font-size:10px;text-align:right;">cada lado</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~10 min</span></div>
+    <div class="legenda">
+      <div class="leg-title">Como executar</div>
+      <div class="leg-item"><span class="leg-dot" style="color:var(--accent)">1</span><span><strong style="color:var(--white)">Hollow Body Hold:</strong> deitado, lombar colada no chão, braços estendidos, pernas levemente elevadas.</span></div>
+      <div class="leg-item"><span class="leg-dot" style="color:var(--accent)">2</span><span><strong style="color:var(--white)">Dead Bug:</strong> braços pro teto, joelhos a 90°. Estende braço e perna opostos. Lombar no chão o tempo todo.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showScreen('grade', this)">
+    <span class="icon">📅</span>
+    <span>Grade</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('treino', this)">
+    <span class="icon">💪</span>
+    <span>Treinos</span>
+  </button>
+</div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  function showScreen(id, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function showPanel(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-a','active-b','active-c','active-core'));
+    document.getElementById('p'+id).classList.add('active');
+    btn.classList.add('active-' + id);
+  }
+</script>
+
+</body>
+</html>
