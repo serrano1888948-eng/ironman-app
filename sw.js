@@ -1,5 +1,10 @@
 const CACHE = 'ironman-v1';
-const FILES = ['/', '/index.html', '/manifest.json', '/icon.svg'];
+const FILES = [
+  '/ironman-app/',
+  '/ironman-app/index.html',
+  '/ironman-app/manifest.json',
+  '/ironman-app/icon.svg'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
