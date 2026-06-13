@@ -80,4 +80,4 @@ Fase 3 — Integrações externas        ░░░░░░░░░░   0%
 
 
 Projeto pessoal em construção contínua.
-Meta: linha de chegada do 70.3 — Janeiro 2027.
+Meta: linha de chegada do 70.3 — Janeiro 2028.
