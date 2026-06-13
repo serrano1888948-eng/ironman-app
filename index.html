@@ -540,6 +540,101 @@
     margin-top: 2px;
   }
 
+  /* ANÁLISE IA */
+  .ia-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .ia-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .ia-icon { font-size: 24px; }
+  .ia-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .ia-card-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .ia-analysis {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  .btn-analyze {
+    width: 100%;
+    background: linear-gradient(135deg, #C8F135, #a8d420);
+    color: var(--black);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+  .btn-analyze:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .ia-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+  }
+  .ia-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ia-no-strava {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+  }
+  .ia-no-strava-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .ia-no-strava-sub {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .ia-timestamp {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 12px;
+    letter-spacing: 0.08em;
+  }
+
   /* STRAVA */
   .strava-connect {
     background: var(--card);
@@ -1027,6 +1122,15 @@
   </div>
 </div>
 
+<!-- ANÁLISE IA SCREEN -->
+<div id="screen-ia" class="screen">
+  <header>
+    <span class="tag">Projeto LS · Inteligência</span>
+    <h1>Análise <span>IA</span></h1>
+  </header>
+  <div id="ia-content" style="padding:16px 16px 80px;"></div>
+</div>
+
 <!-- STRAVA SCREEN -->
 <div id="screen-strava" class="screen">
   <header>
@@ -1066,6 +1170,9 @@
   </button>
   <button class="nav-btn" onclick="showScreen('strava',this);renderStrava()">
     <span class="icon">🟠</span><span>Strava</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('ia',this);renderIA()">
+    <span class="icon">🤖</span><span>IA</span>
   </button>
   <button class="nav-btn" onclick="showScreen('roadmap',this)">
     <span class="icon">🗺️</span><span>Roadmap</span>
@@ -1411,6 +1518,100 @@
     });
 
     cont.innerHTML = html;
+  };
+
+  // ── ANÁLISE IA ────────────────────────────────
+  window.renderIA = async function() {
+    const cont   = document.getElementById('ia-content');
+    const tokens = getStravaTokens();
+
+    if (!tokens) {
+      cont.innerHTML = `
+        <div class="ia-no-strava">
+          <div style="font-size:36px;margin-bottom:12px;">🤖</div>
+          <div class="ia-no-strava-title">Strava não conectado</div>
+          <div class="ia-no-strava-sub">Conecte o Strava primeiro para que a IA possa analisar seus treinos de corrida, natação e bike.</div>
+          <button onclick="showScreen('strava', document.querySelectorAll('.nav-btn')[3]);renderStrava()" 
+            style="margin-top:16px;background:var(--accent-dim);border:1px solid rgba(200,241,53,0.2);color:var(--accent);border-radius:8px;padding:10px 20px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.08em;">
+            IR PARA STRAVA
+          </button>
+        </div>`;
+      return;
+    }
+
+    // Verifica se já tem análise salva recente (menos de 6h)
+    const saved = JSON.parse(localStorage.getItem('ia_analysis') || 'null');
+    const agora = Date.now();
+
+    cont.innerHTML = `
+      <div class="ia-card" style="border-color:rgba(200,241,53,0.2);background:rgba(200,241,53,0.04);">
+        <div class="ia-card-header">
+          <div class="ia-icon">🤖</div>
+          <div>
+            <div class="ia-card-title">Análise de Treinos</div>
+            <div class="ia-card-sub">Baseada nas suas últimas atividades do Strava</div>
+          </div>
+        </div>
+        <button class="btn-analyze" id="btn-analyze" onclick="gerarAnalise()">
+          ⚡ ANALISAR MEUS TREINOS
+        </button>
+        <div id="ia-result">
+          ${saved && (agora - saved.timestamp) < 6 * 3600 * 1000
+            ? `<div class="ia-analysis">${saved.text}</div><div class="ia-timestamp">Análise gerada em ${new Date(saved.timestamp).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>`
+            : `<div style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0;">Toque no botão para gerar sua análise personalizada.</div>`
+          }
+        </div>
+      </div>`;
+  };
+
+  window.gerarAnalise = async function() {
+    const btn    = document.getElementById('btn-analyze');
+    const result = document.getElementById('ia-result');
+    btn.disabled = true;
+    btn.textContent = 'Analisando...';
+
+    result.innerHTML = `<div class="ia-loading"><div class="ia-spinner"></div>Buscando atividades do Strava...</div>`;
+
+    try {
+      const token = await getValidToken();
+      if (!token) throw new Error('Token inválido');
+
+      const res = await fetch(`${WORKER_URL}/activities?per_page=20`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const activities = await res.json();
+
+      if (!Array.isArray(activities) || activities.length === 0) {
+        result.innerHTML = `<div style="font-size:12px;color:var(--muted);text-align:center;padding:20px;">Nenhuma atividade encontrada no Strava.</div>`;
+        btn.disabled = false;
+        btn.textContent = '⚡ ANALISAR MEUS TREINOS';
+        return;
+      }
+
+      result.innerHTML = `<div class="ia-loading"><div class="ia-spinner"></div>Analisando com IA...</div>`;
+
+      const analyzeRes = await fetch(`${WORKER_URL}/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activities, phase: 'Fase 1' })
+      });
+
+      const data = await analyzeRes.json();
+      const text = data.analysis || 'Erro ao gerar análise.';
+
+      // Salva no localStorage
+      localStorage.setItem('ia_analysis', JSON.stringify({ text, timestamp: Date.now() }));
+
+      result.innerHTML = `
+        <div class="ia-analysis">${text}</div>
+        <div class="ia-timestamp">Análise gerada às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>`;
+
+    } catch(e) {
+      result.innerHTML = `<div style="font-size:12px;color:#ff6b6b;text-align:center;padding:20px;">Erro ao gerar análise. Tente novamente.</div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = '⚡ ANALISAR MEUS TREINOS';
   };
 
   // ── STRAVA ────────────────────────────────────
