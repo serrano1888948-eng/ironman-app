@@ -540,6 +540,114 @@
     margin-top: 2px;
   }
 
+  /* STRAVA */
+  .strava-connect {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .strava-logo {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+  .strava-connect-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .strava-connect-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .btn-strava {
+    display: inline-block;
+    background: #FC4C02;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .strava-athlete {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .strava-athlete-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    flex: 1;
+  }
+  .strava-connected-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    background: rgba(252,76,2,0.15);
+    color: #FC4C02;
+    border: 1px solid rgba(252,76,2,0.3);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .activity-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .activity-icon { font-size: 22px; flex-shrink: 0; }
+  .activity-info { flex: 1; min-width: 0; }
+  .activity-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .activity-date { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .activity-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+  .activity-stat {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+  }
+  .activity-stat span { color: var(--muted); }
+  .activity-type-run  { border-left: 3px solid #ff6b6b; }
+  .activity-type-swim { border-left: 3px solid var(--purple); }
+  .activity-type-ride { border-left: 3px solid var(--orange); }
+  .activity-type-other { border-left: 3px solid var(--muted); }
+
+  .strava-section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 16px 0 10px;
+  }
+
   footer {
     border-top: 1px solid var(--border);
     padding: 12px 16px;
@@ -919,6 +1027,15 @@
   </div>
 </div>
 
+<!-- STRAVA SCREEN -->
+<div id="screen-strava" class="screen">
+  <header>
+    <span class="tag">Projeto LS · Atividades</span>
+    <h1>Strava <span>Connect</span></h1>
+  </header>
+  <div id="strava-content" style="padding:16px 16px 80px;"></div>
+</div>
+
 <!-- BANNER LOGIN -->
 <div id="login-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;background:#1a1a1a;border:1px solid rgba(200,241,53,0.3);border-radius:12px;padding:16px;z-index:150;flex-direction:column;gap:10px;">
   <div>
@@ -946,6 +1063,9 @@
   </button>
   <button class="nav-btn" onclick="showScreen('historico',this);renderHistorico()">
     <span class="icon">📈</span><span>Evolução</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('strava',this);renderStrava()">
+    <span class="icon">🟠</span><span>Strava</span>
   </button>
   <button class="nav-btn" onclick="showScreen('roadmap',this)">
     <span class="icon">🗺️</span><span>Roadmap</span>
@@ -1292,6 +1412,168 @@
 
     cont.innerHTML = html;
   };
+
+  // ── STRAVA ────────────────────────────────────
+  const WORKER_URL = 'https://strava-proxy.serrano1888948.workers.dev';
+
+  function getStravaTokens() {
+    try { return JSON.parse(localStorage.getItem('strava_tokens') || 'null'); } catch(e) { return null; }
+  }
+  function saveStravaTokens(tokens) {
+    localStorage.setItem('strava_tokens', JSON.stringify(tokens));
+  }
+  function clearStravaTokens() {
+    localStorage.removeItem('strava_tokens');
+  }
+
+  async function getValidToken() {
+    const tokens = getStravaTokens();
+    if (!tokens) return null;
+    // Renova se expirado
+    if (Date.now() / 1000 > tokens.expires_at - 300) {
+      try {
+        const res = await fetch(`${WORKER_URL}/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: tokens.refresh_token })
+        });
+        const novo = await res.json();
+        const updated = { ...tokens, access_token: novo.access_token, expires_at: novo.expires_at };
+        saveStravaTokens(updated);
+        return updated.access_token;
+      } catch(e) { return tokens.access_token; }
+    }
+    return tokens.access_token;
+  }
+
+  // Processa tokens que chegam via URL (callback do OAuth)
+  function processStravaCallback() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('strava') === 'ok') {
+      saveStravaTokens({
+        access_token:  params.get('access_token'),
+        refresh_token: params.get('refresh_token'),
+        expires_at:    parseInt(params.get('expires_at')),
+        athlete_id:    params.get('athlete_id'),
+        athlete_name:  params.get('athlete_name'),
+      });
+      // Limpa a URL sem recarregar
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
+  function activityIcon(type) {
+    if (type === 'Run')  return '🏃';
+    if (type === 'Swim') return '🏊';
+    if (type === 'Ride') return '🚴';
+    if (type === 'Walk') return '🚶';
+    return '⚡';
+  }
+
+  function activityTypeClass(type) {
+    if (type === 'Run')  return 'activity-type-run';
+    if (type === 'Swim') return 'activity-type-swim';
+    if (type === 'Ride') return 'activity-type-ride';
+    return 'activity-type-other';
+  }
+
+  function formatDist(meters) {
+    if (!meters) return '—';
+    return meters >= 1000 ? (meters / 1000).toFixed(1) + 'km' : meters + 'm';
+  }
+
+  function formatTime(seconds) {
+    if (!seconds) return '—';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}h${String(m).padStart(2,'0')}`;
+    return `${m}m${String(s).padStart(2,'0')}s`;
+  }
+
+  function formatPace(mps, type) {
+    if (!mps || mps === 0) return '—';
+    if (type === 'Swim') {
+      const secPer100m = 100 / mps;
+      const m = Math.floor(secPer100m / 60);
+      const s = Math.round(secPer100m % 60);
+      return `${m}:${String(s).padStart(2,'0')}/100m`;
+    }
+    const secPerKm = 1000 / mps;
+    const m = Math.floor(secPerKm / 60);
+    const s = Math.round(secPerKm % 60);
+    return `${m}:${String(s).padStart(2,'0')}/km`;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit' });
+  }
+
+  window.renderStrava = async function() {
+    const cont = document.getElementById('strava-content');
+    const tokens = getStravaTokens();
+
+    if (!tokens) {
+      cont.innerHTML = `
+        <div class="strava-connect">
+          <div class="strava-logo">🟠</div>
+          <div class="strava-connect-title">Conectar ao Strava</div>
+          <div class="strava-connect-sub">Sincronize suas corridas, natações e pedaladas automaticamente no app.</div>
+          <a href="${WORKER_URL}/auth" class="btn-strava">CONECTAR COM STRAVA</a>
+        </div>`;
+      return;
+    }
+
+    cont.innerHTML = `
+      <div class="strava-athlete">
+        <div class="strava-logo" style="font-size:24px;">🟠</div>
+        <div class="strava-athlete-name">${tokens.athlete_name || 'Atleta'}</div>
+        <span class="strava-connected-badge">CONECTADO</span>
+      </div>
+      <div class="strava-section-title">Últimas atividades</div>
+      <div id="activities-list"><div style="text-align:center;padding:30px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">carregando...</div></div>
+      <div style="text-align:center;margin-top:12px;">
+        <button onclick="clearStravaTokens();renderStrava();" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;letter-spacing:0.08em;">DESCONECTAR</button>
+      </div>`;
+
+    const token = await getValidToken();
+    if (!token) { renderStrava(); return; }
+
+    try {
+      const res = await fetch(`${WORKER_URL}/activities?per_page=20`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const activities = await res.json();
+
+      if (!Array.isArray(activities) || activities.length === 0) {
+        document.getElementById('activities-list').innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">Nenhuma atividade encontrada.</div>`;
+        return;
+      }
+
+      const html = activities.map(a => `
+        <div class="activity-card ${activityTypeClass(a.type)}">
+          <div class="activity-icon">${activityIcon(a.type)}</div>
+          <div class="activity-info">
+            <div class="activity-name">${a.name}</div>
+            <div class="activity-date">${formatDate(a.start_date_local)}</div>
+            <div class="activity-stats">
+              <div class="activity-stat">${formatDist(a.distance)} <span>dist</span></div>
+              <div class="activity-stat">${formatTime(a.moving_time)} <span>tempo</span></div>
+              ${a.average_speed ? `<div class="activity-stat">${formatPace(a.average_speed, a.type)} <span>ritmo</span></div>` : ''}
+              ${a.average_heartrate ? `<div class="activity-stat">${Math.round(a.average_heartrate)}bpm <span>FC</span></div>` : ''}
+            </div>
+          </div>
+        </div>`).join('');
+
+      document.getElementById('activities-list').innerHTML = html;
+    } catch(e) {
+      document.getElementById('activities-list').innerHTML = `<div style="text-align:center;padding:30px;color:#ff6b6b;font-family:'Space Mono',monospace;font-size:11px;">Erro ao carregar atividades.<br>Tente novamente.</div>`;
+    }
+  };
+
+  // Processa callback do Strava ao carregar
+  processStravaCallback();
 
   // ── INIT ──────────────────────────────────────
   if ('serviceWorker' in navigator) {
