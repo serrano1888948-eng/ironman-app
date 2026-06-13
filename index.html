@@ -920,14 +920,20 @@
 </div>
 
 <!-- BANNER LOGIN -->
-<div id="login-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;background:#1a1a1a;border:1px solid rgba(200,241,53,0.3);border-radius:12px;padding:14px 16px;z-index:150;align-items:center;gap:12px;">
-  <div style="flex:1;">
+<div id="login-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;background:#1a1a1a;border:1px solid rgba(200,241,53,0.3);border-radius:12px;padding:16px;z-index:150;flex-direction:column;gap:10px;">
+  <div>
     <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Histórico offline</div>
-    <div style="font-size:12px;color:var(--text);">Entre com Google para sincronizar</div>
+    <div style="font-size:13px;font-weight:600;color:var(--white);">Entre para sincronizar na nuvem</div>
   </div>
-  <button onclick="fazerLogin()" style="background:var(--accent);color:var(--black);border:none;border-radius:8px;padding:8px 14px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">
-    ENTRAR
+  <input id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"
+    style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--white);font-family:'Space Grotesk',sans-serif;outline:none;">
+  <input id="login-senha" type="password" placeholder="Senha" autocomplete="current-password"
+    style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--white);font-family:'Space Grotesk',sans-serif;outline:none;">
+  <div id="login-erro" style="font-size:11px;color:#ff6b6b;font-family:'Space Mono',monospace;min-height:14px;"></div>
+  <button onclick="fazerLogin()" style="width:100%;background:var(--accent);color:var(--black);border:none;border-radius:8px;padding:11px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0.08em;">
+    ENTRAR / CRIAR CONTA
   </button>
+  <div style="font-size:10px;color:var(--muted);text-align:center;">Primeira vez? Digite um email e senha para criar sua conta.</div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -979,31 +985,20 @@
       return;
     }
     try {
-      const { initializeApp }                                = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
-      const { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, setPersistence, browserLocalPersistence, indexedDBLocalPersistence } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
-      const { getDatabase, ref, set, get, child }           = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+      const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, indexedDBLocalPersistence } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+      const { getDatabase, ref, set, get, child } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
 
       const app  = initializeApp(FIREBASE_CONFIG);
       const auth = getAuth(app);
       db = getDatabase(app);
-
       window._rtdb = { ref, set, get, child };
 
-      // Força persistência local (sobrevive ao fechar/reabrir o app)
+      // Persistência máxima
       try {
         await setPersistence(auth, indexedDBLocalPersistence);
       } catch(e) {
         try { await setPersistence(auth, browserLocalPersistence); } catch(e2) {}
-      }
-
-      // Trata retorno de redirect (caso popup tenha caído pra redirect)
-      try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          userId = result.user.uid;
-        }
-      } catch(e) {
-        console.warn('getRedirectResult:', e);
       }
 
       onAuthStateChanged(auth, async user => {
@@ -1021,31 +1016,30 @@
         }
       });
 
-      // Detecta se está rodando como PWA (tela inicial)
-      const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
       window.fazerLogin = async function() {
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
+        const email = document.getElementById('login-email').value.trim();
+        const senha = document.getElementById('login-senha').value;
+        const errEl = document.getElementById('login-erro');
+        errEl.textContent = '';
+        if (!email || !senha) { errEl.textContent = 'Preencha email e senha.'; return; }
         try {
-          if (isPWA) {
-            // PWA standalone: redirect é mais confiável
-            await signInWithRedirect(auth, provider);
-          } else {
-            // Safari/Chrome normal: popup funciona melhor
-            await signInWithPopup(auth, provider);
-          }
+          await signInWithEmailAndPassword(auth, email, senha);
         } catch(e) {
-          // Se popup falhar, tenta redirect
-          console.warn('Login popup falhou, tentando redirect', e);
-          try {
-            await signInWithRedirect(auth, provider);
-          } catch(e2) {
-            console.warn('Login falhou completamente', e2);
-            alert('Não foi possível conectar. Tente abrir pelo Safari primeiro, fazer login, e depois adicionar à tela inicial.');
+          if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+            // Cria conta automaticamente na primeira vez
+            try {
+              await createUserWithEmailAndPassword(auth, email, senha);
+            } catch(e2) {
+              errEl.textContent = 'Erro: ' + (e2.message || 'Tente novamente.');
+            }
+          } else if (e.code === 'auth/wrong-password') {
+            errEl.textContent = 'Senha incorreta.';
+          } else {
+            errEl.textContent = 'Erro: ' + (e.message || 'Tente novamente.');
           }
         }
       };
+
     } catch(e) {
       console.warn('Firebase não disponível, usando localStorage.', e);
       setSyncStatus('local');
