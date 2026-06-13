@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronMan">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Projeto LS · Road to Iron Man</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --card: #161616;
+    --border: #272727;
+    --accent: #C8F135;
+    --accent-dim: rgba(200,241,53,0.08);
+    --orange: #FF8C42;
+    --orange-dim: rgba(255,140,66,0.08);
+    --blue: #4d9fff;
+    --blue-dim: rgba(77,159,255,0.08);
+    --purple: #b57aff;
+    --purple-dim: rgba(181,122,255,0.08);
+    --text: #e0e0e0;
+    --muted: #666;
+    --white: #fff;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* SYNC STATUS */
+  .sync-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 300;
+  }
+  .sync-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .sync-indicator {
+    position: fixed;
+    top: 8px;
+    right: 12px;
+    z-index: 300;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .sync-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .sync-dot.online { background: var(--accent); }
+  .sync-dot.syncing { background: var(--orange); animation: pulse 1s infinite; }
+  .sync-dot.error { background: #ff6b6b; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #111;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 100;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 12px 4px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn .icon { font-size: 18px; }
+
+  /* SCREENS */
+  .screen { display: none; padding: 0 0 80px; }
+  .screen.active { display: block; }
+
+  /* HEADER */
+  header {
+    padding: 52px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+  h1 { font-size: 20px; font-weight: 700; color: var(--white); }
+  h1 span { color: var(--accent); }
+
+  /* GRADE */
+  .week-header { padding: 16px 16px 8px; }
+  .week-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .week-grid { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; }
+  .week-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .week-row.treino-a { border-left: 3px solid var(--accent); }
+  .week-row.treino-b { border-left: 3px solid var(--orange); }
+  .week-row.treino-c { border-left: 3px solid var(--blue); }
+  .week-row.natacao  { border-left: 3px solid var(--purple); }
+  .week-row.corrida  { border-left: 3px solid #ff6b6b; }
+  .week-row.descanso { border-left: 3px solid var(--border); opacity: 0.6; }
+
+  .week-day {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    width: 36px;
+    flex-shrink: 0;
+  }
+  .week-info { flex: 1; }
+  .week-activity { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+  .week-detail { font-size: 11px; color: var(--muted); }
+  .week-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .badge-a   { background: var(--accent-dim); color: var(--accent); }
+  .badge-b   { background: var(--orange-dim); color: var(--orange); }
+  .badge-c   { background: var(--blue-dim);   color: var(--blue); }
+  .badge-nat { background: var(--purple-dim); color: var(--purple); }
+  .badge-run { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+
+  /* HOJE */
+  .week-row.hoje {
+    box-shadow: 0 0 0 1.5px var(--accent);
+    background: rgba(200,241,53,0.05);
+    position: relative;
+  }
+  .week-row.hoje.corrida  { box-shadow: 0 0 0 1.5px #ff6b6b;       background: rgba(255,107,107,0.06); }
+  .week-row.hoje.natacao  { box-shadow: 0 0 0 1.5px var(--purple);  background: rgba(181,122,255,0.06); }
+  .week-row.hoje.treino-b { box-shadow: 0 0 0 1.5px var(--orange);  background: rgba(255,140,66,0.06); }
+  .week-row.hoje.treino-c { box-shadow: 0 0 0 1.5px var(--blue);    background: rgba(77,159,255,0.06); }
+  .week-row.hoje.descanso { box-shadow: 0 0 0 1.5px var(--muted); }
+  .hoje-tag {
+    position: absolute;
+    top: -9px; left: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--black);
+    padding: 1px 7px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .week-row.hoje.corrida  .hoje-tag { background: #ff6b6b; }
+  .week-row.hoje.natacao  .hoje-tag { background: var(--purple); }
+  .week-row.hoje.treino-b .hoje-tag { background: var(--orange); }
+  .week-row.hoje.treino-c .hoje-tag { background: var(--blue); }
+
+  /* VOLUME */
+  .volume-card {
+    margin: 0 16px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .volume-card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .volume-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(39,39,39,0.5);
+    gap: 10px;
+  }
+  .volume-row:last-child { border-bottom: none; }
+  .volume-muscle { flex: 1; font-size: 12px; font-weight: 600; color: var(--white); }
+  .volume-bar-wrap { width: 80px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .volume-bar { height: 100%; border-radius: 2px; }
+  .volume-num { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--white); width: 24px; text-align: right; }
+  .volume-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); width: 40px; text-align: right; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 4px;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+  }
+  .tab.active-a    { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab.active-b    { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab.active-c    { color: var(--blue);   border-bottom-color: var(--blue); }
+  .tab.active-core { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* PANELS */
+  .panel { display: none; padding: 16px; }
+  .panel.active { display: block; }
+
+  /* TREINO HEADER */
+  .treino-header {
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border: 1px solid;
+  }
+  .treino-header.a    { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
+  .treino-header.b    { background: var(--orange-dim); border-color: rgba(255,140,66,0.2); }
+  .treino-header.c    { background: var(--blue-dim);   border-color: rgba(77,159,255,0.2); }
+  .treino-header.core { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
+  .treino-day {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .treino-header.a .treino-day,
+  .treino-header.core .treino-day { color: var(--accent); }
+  .treino-header.b .treino-day    { color: var(--orange); }
+  .treino-header.c .treino-day    { color: var(--blue); }
+  .treino-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .treino-meta { font-size: 11px; color: var(--muted); display: flex; gap: 12px; }
+
+  /* TABLE */
+  .ex-table { width: 100%; border-collapse: collapse; }
+  .ex-table thead tr { border-bottom: 1px solid var(--border); }
+  .ex-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: 400;
+  }
+  .ex-table th:last-child { text-align: right; }
+  .ex-table tbody tr { border-bottom: 1px solid rgba(39,39,39,0.6); }
+  .ex-table tbody tr:last-child { border-bottom: none; }
+  .ex-table td { padding: 11px 8px; vertical-align: middle; }
+  .ex-num  { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); width: 20px; }
+  .ex-name { font-size: 13px; font-weight: 600; color: var(--white); }
+  .ex-dose { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: var(--white); white-space: nowrap; text-align: center; }
+  .ex-fail { font-size: 10px; text-align: right; white-space: nowrap; }
+  .fail-rir { color: #ff6b6b; }
+  .fail-opt { color: var(--orange); }
+  .fail-go  { color: var(--accent); }
+
+  .time-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+  .time-badge span { color: var(--white); font-weight: 700; }
+
+  .legenda {
+    margin-top: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .leg-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .leg-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 12px; line-height: 1.4; }
+  .leg-item:last-child { margin-bottom: 0; }
+  .leg-dot { flex-shrink: 0; margin-top: 3px; font-size: 10px; font-family: 'Space Mono', monospace; }
+
+  /* REGISTRO */
+  .ex-hint-row td { padding: 0 8px 10px; }
+  .ex-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+  .hint-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
+  .hint-val   { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent); flex: 1; }
+  .hint-date  { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+  .btn-reg {
+    flex-shrink: 0;
+    background: var(--accent-dim);
+    border: 1px solid rgba(200,241,53,0.2);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  /* HISTÓRICO */
+  .hist-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .hist-ex-name { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 12px; }
+  .hist-row { display: flex; align-items: center; gap: 16px; }
+  .hist-stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .hist-stat-val   { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+  .hist-stat-date  { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  /* ROADMAP */
+  .roadmap-wrap { padding: 16px 16px 80px; }
+
+  .roadmap-intro {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 24px;
+  }
+  .roadmap-intro-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .roadmap-intro-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .roadmap-intro-sub { font-size: 12px; color: var(--muted); }
+
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  .tl-item { position: relative; margin-bottom: 8px; }
+
+  .tl-dot {
+    position: absolute;
+    left: -24px;
+    top: 16px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--black);
+    z-index: 1;
+  }
+  .tl-dot.fase1   { border-color: var(--accent);  background: rgba(200,241,53,0.2); }
+  .tl-dot.ferias  { border-color: var(--muted);   background: var(--black); }
+  .tl-dot.fase2   { border-color: var(--orange);  background: rgba(255,140,66,0.2); }
+  .tl-dot.fase3   { border-color: var(--blue);    background: rgba(77,159,255,0.2); }
+  .tl-dot.m1      { border-color: var(--purple);  background: rgba(181,122,255,0.3); width:18px; height:18px; left:-26px; top:14px; }
+  .tl-dot.m2      { border-color: #FFD700;        background: rgba(255,215,0,0.3);   width:18px; height:18px; left:-26px; top:14px; }
+
+  .tl-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .tl-card.fase1  { border-left: 3px solid var(--accent); }
+  .tl-card.fase2  { border-left: 3px solid var(--orange); }
+  .tl-card.fase3  { border-left: 3px solid var(--blue); }
+  .tl-card.ferias { border-left: 3px solid var(--muted); opacity: 0.6; }
+  .tl-card.m1     { border-left: 3px solid var(--purple); background: rgba(181,122,255,0.06); }
+  .tl-card.m2     { border-left: 3px solid #FFD700; background: rgba(255,215,0,0.06); }
+  .tl-card.atual  { box-shadow: 0 0 0 1.5px var(--accent); }
+
+  .tl-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .tl-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .tl-card.m1 .tl-title { color: var(--purple); }
+  .tl-card.m2 .tl-title { color: #FFD700; }
+
+  .tl-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tl-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .tag-musculacao { background: var(--accent-dim);  color: var(--accent); }
+  .tag-corrida    { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+  .tag-natacao    { background: var(--purple-dim);  color: var(--purple); }
+  .tag-bike       { background: var(--orange-dim);  color: var(--orange); }
+  .tag-pausa      { background: rgba(100,100,100,0.1); color: var(--muted); }
+  .tag-atual      { background: var(--accent); color: var(--black); }
+
+  .tl-atual-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--black);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .roadmap-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .roadmap-meta-item { text-align: center; }
+  .roadmap-meta-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .roadmap-meta-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- SYNC BAR -->
+<div class="sync-bar"><div class="sync-bar-fill" id="sync-fill"></div></div>
+<div class="sync-indicator">
+  <div class="sync-dot" id="sync-dot"></div>
+  <span id="sync-label">local</span>
+</div>
+
+<!-- GRADE SCREEN -->
+<div id="screen-grade" class="screen active">
+  <header>
+    <span class="tag">Projeto LS · Road to Iron Man</span>
+    <h1>Fase 1 <span>Força, Corrida e Natação</span></h1>
+  </header>
+
+  <div class="week-header">
+    <div class="week-title">Grade Semanal</div>
+  </div>
+
+  <div class="week-grid">
+    <div class="week-row treino-a" data-day="seg">
+      <div class="week-day">Seg</div>
+      <div class="week-info">
+        <div class="week-activity">Treino A</div>
+        <div class="week-detail">Push + Legs · ~60 min</div>
+      </div>
+      <span class="week-badge badge-a">MUSCULAÇÃO</span>
+    </div>
+    <div class="week-row natacao" data-day="ter">
+      <div class="week-day">Ter</div>
+      <div class="week-info">
+        <div class="week-activity">Natação</div>
+        <div class="week-detail">VemNadar · Mar aberto</div>
+      </div>
+      <span class="week-badge badge-nat">NATAÇÃO</span>
+    </div>
+    <div class="week-row corrida" data-day="qua">
+      <div class="week-day">Qua</div>
+      <div class="week-info">
+        <div class="week-activity">Corrida de Intensidade</div>
+        <div class="week-detail">Runna · Intervalos ou tempo run</div>
+      </div>
+      <span class="week-badge badge-run">CORRIDA</span>
+    </div>
+    <div class="week-row treino-b" data-day="qui">
+      <div class="week-day">Qui</div>
+      <div class="week-info">
+        <div class="week-activity">Natação + Treino B</div>
+        <div class="week-detail">Natação + Pull + Legs · ~55 min</div>
+      </div>
+      <span class="week-badge badge-b">DUPLO</span>
+    </div>
+    <div class="week-row corrida" data-day="sex">
+      <div class="week-day">Sex</div>
+      <div class="week-info">
+        <div class="week-activity">Corrida Leve</div>
+        <div class="week-detail">Runna · Z2 · Ritmo confortável</div>
+      </div>
+      <span class="week-badge badge-run">CORRIDA</span>
+    </div>
+    <div class="week-row treino-c" data-day="sab">
+      <div class="week-day">Sáb</div>
+      <div class="week-info">
+        <div class="week-activity">Treino C</div>
+        <div class="week-detail">Full Upper · ~55 min</div>
+      </div>
+      <span class="week-badge badge-c">MUSCULAÇÃO</span>
+    </div>
+    <div class="week-row corrida" data-day="dom">
+      <div class="week-day">Dom</div>
+      <div class="week-info">
+        <div class="week-activity">Long Run</div>
+        <div class="week-detail">Runna · Z2 · Treino mais longo da semana</div>
+      </div>
+      <span class="week-badge badge-run">CORRIDA</span>
+    </div>
+  </div>
+
+  <div class="week-header" style="padding-top:8px;">
+    <div class="week-title">Volume Semanal por Grupamento</div>
+  </div>
+  <div class="volume-card">
+    <div class="volume-card-title">Séries · Treinos A + B + C</div>
+    <div class="volume-row">
+      <div class="volume-muscle">Quadríceps</div>
+      <div class="volume-bar-wrap"><div class="volume-bar" style="width:85%;background:#C8F135;"></div></div>
+      <div class="volume-num">11</div><div class="volume-label">séries</div>
+    </div>
+    <div class="volume-row">
+      <div class="volume-muscle">Posterior / Glúteo</div>
+      <div class="volume-bar-wrap"><div class="volume-bar" style="width:92%;background:#C8F135;"></div></div>
+      <div class="volume-num">12</div><div class="volume-label">séries</div>
+    </div>
+    <div class="volume-row">
+      <div class="volume-muscle">Peito</div>
+      <div class="volume-bar-wrap"><div class="volume-bar" style="width:84%;background:#FF8C42;"></div></div>
+      <div class="volume-num">11</div><div class="volume-label">séries</div>
+    </div>
+    <div class="volume-row">
+      <div class="volume-muscle">Costas</div>
+      <div class="volume-bar-wrap"><div class="volume-bar" style="width:100%;background:#FF8C42;"></div></div>
+      <div class="volume-num">13</div><div class="volume-label">séries</div>
+    </div>
+    <div class="volume-row">
+      <div class="volume-muscle">Ombro</div>
+      <div class="volume-bar-wrap"><div class="volume-bar" style="width:69%;background:#4d9fff;"></div></div>
+      <div class="volume-num">9</div><div class="volume-label">séries</div>
+    </div>
+    <div class="volume-row">
+      <div class="volume-muscle">Core</div>
+      <div class="volume-bar-wrap"><div class="volume-bar" style="width:46%;background:#b57aff;"></div></div>
+      <div class="volume-num">6</div><div class="volume-label">séries</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>PROJETO LS · ROAD TO IRON MAN</span>
+    <span>Reavalia em 8–12 semanas</span>
+  </footer>
+</div>
+
+<!-- TREINO SCREEN -->
+<div id="screen-treino" class="screen">
+  <header>
+    <span class="tag">Projeto LS · Road to Iron Man</span>
+    <h1>Fase 1 <span>Força, Corrida e Natação</span></h1>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active-a" onclick="showPanel('a',this)">Treino A</button>
+    <button class="tab" onclick="showPanel('b',this)">Treino B</button>
+    <button class="tab" onclick="showPanel('c',this)">Treino C</button>
+    <button class="tab" onclick="showPanel('core',this)">Core</button>
+  </div>
+
+  <!-- TREINO A -->
+  <div id="pa" class="panel active">
+    <div class="treino-header a">
+      <div class="treino-day">Segunda-feira</div>
+      <div class="treino-name">Push + Legs</div>
+      <div class="treino-meta"><span>7 exercícios</span><span>~60 min</span></div>
+    </div>
+    <table class="ex-table">
+      <thead><tr><th></th><th>Exercício</th><th style="text-align:center">Séries × Reps</th><th>Falha</th></tr></thead>
+      <tbody>
+        <tr data-ex="back-squat"><td class="ex-num">1</td><td><div class="ex-name">Back Squat</div></td><td class="ex-dose">4 × 4–6</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="rdl-barra"><td class="ex-num">2</td><td><div class="ex-name">RDL com Barra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="supino-inc-halt"><td class="ex-num">3</td><td><div class="ex-name">Supino Inclinado com Halteres</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="desenv-halt"><td class="ex-num">4</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="crucifixo-cabo"><td class="ex-num">5</td><td><div class="ex-name">Crucifixo no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+        <tr data-ex="elev-lat-cabo"><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+        <tr data-ex="remada-alta-cabo"><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~60 min</span></div>
+    <div class="legenda">
+      <div class="leg-title">Legenda</div>
+      <div class="leg-item"><span class="leg-dot fail-rir">RIR</span><span>Para 1–2 reps antes da falha.</span></div>
+      <div class="leg-item"><span class="leg-dot fail-opt">OPT</span><span>Última série até a falha — opcional.</span></div>
+      <div class="leg-item"><span class="leg-dot fail-go">FALHA</span><span>Última série vai até a falha.</span></div>
+    </div>
+  </div>
+
+  <!-- TREINO B -->
+  <div id="pb" class="panel">
+    <div class="treino-header b">
+      <div class="treino-day">Quinta-feira · Natação / Pull+Legs</div>
+      <div class="treino-name">Pull + Legs</div>
+      <div class="treino-meta"><span>7 exercícios</span><span>~55 min</span></div>
+    </div>
+    <table class="ex-table">
+      <thead><tr><th></th><th>Exercício</th><th style="text-align:center">Séries × Reps</th><th>Falha</th></tr></thead>
+      <tbody>
+        <tr data-ex="rdl-barra"><td class="ex-num">1</td><td><div class="ex-name">RDL com Barra</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="front-squat"><td class="ex-num">2</td><td><div class="ex-name">Front Squat</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="puxada-neutra"><td class="ex-num">3</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="remada-curv-barra"><td class="ex-num">4</td><td><div class="ex-name">Remada Curvada com Barra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="puxada-aberta"><td class="ex-num">5</td><td><div class="ex-name">Puxada Aberta</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="remada-baixa-cabo"><td class="ex-num">6</td><td><div class="ex-name">Remada Baixa no Cabo</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="cadeira-ext"><td class="ex-num">7</td><td><div class="ex-name">Cadeira Extensora</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~55 min</span></div>
+  </div>
+
+  <!-- TREINO C -->
+  <div id="pc" class="panel">
+    <div class="treino-header c">
+      <div class="treino-day">Sábado</div>
+      <div class="treino-name">Full Upper</div>
+      <div class="treino-meta"><span>7 exercícios</span><span>~55 min</span></div>
+    </div>
+    <table class="ex-table">
+      <thead><tr><th></th><th>Exercício</th><th style="text-align:center">Séries × Reps</th><th>Falha</th></tr></thead>
+      <tbody>
+        <tr data-ex="supino-inc-halt"><td class="ex-num">1</td><td><div class="ex-name">Supino Inclinado com Halteres</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="paralelas"><td class="ex-num">2</td><td><div class="ex-name">Paralelas</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="desenv-halt"><td class="ex-num">3</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="puxada-neutra"><td class="ex-num">4</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="remada-curv-b2"><td class="ex-num">5</td><td><div class="ex-name">Remada Curvada com Barra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
+        <tr data-ex="elev-lat-cabo"><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+        <tr data-ex="remada-alta-cabo"><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~55 min</span></div>
+  </div>
+
+  <!-- CORE -->
+  <div id="pcore" class="panel">
+    <div class="treino-header core">
+      <div class="treino-day">Em casa · Noite</div>
+      <div class="treino-name">Core Essencial</div>
+      <div class="treino-meta"><span>2 exercícios</span><span>~10 min</span><span>Sem equipamento</span></div>
+    </div>
+    <table class="ex-table">
+      <thead><tr><th></th><th>Exercício</th><th style="text-align:center">Séries × Reps</th><th>Obs</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="ex-num">1</td>
+          <td><div class="ex-name">Hollow Body Hold</div></td>
+          <td class="ex-dose">3 × 20s</td>
+          <td class="ex-fail" style="color:var(--blue);font-size:10px;text-align:right;">até 40s</td>
+        </tr>
+        <tr>
+          <td class="ex-num">2</td>
+          <td><div class="ex-name">Dead Bug</div></td>
+          <td class="ex-dose">3 × 8</td>
+          <td class="ex-fail" style="color:var(--blue);font-size:10px;text-align:right;">cada lado</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="time-badge">⏱ Tempo total <span>~10 min</span></div>
+    <div class="legenda">
+      <div class="leg-title">Como executar</div>
+      <div class="leg-item"><span class="leg-dot" style="color:var(--accent)">1</span><span><strong style="color:var(--white)">Hollow Body Hold:</strong> deitado, lombar colada no chão, braços estendidos, pernas levemente elevadas.</span></div>
+      <div class="leg-item"><span class="leg-dot" style="color:var(--accent)">2</span><span><strong style="color:var(--white)">Dead Bug:</strong> braços pro teto, joelhos a 90°. Estende braço e perna opostos. Lombar no chão o tempo todo.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTÓRICO SCREEN -->
+<div id="screen-historico" class="screen">
+  <header>
+    <span class="tag">Projeto LS · Road to Iron Man</span>
+    <h1>Histórico <span>de Pesos</span></h1>
+  </header>
+  <div id="hist-content" style="padding:16px 16px 80px;"></div>
+</div>
+
+<!-- ROADMAP SCREEN -->
+<div id="screen-roadmap" class="screen">
+  <header>
+    <span class="tag">Projeto LS · Road to Iron Man</span>
+    <h1>Roadmap <span>2026 → 2028</span></h1>
+  </header>
+
+  <div class="roadmap-wrap">
+
+    <!-- INTRO -->
+    <div class="roadmap-intro">
+      <div class="roadmap-intro-label">A missão</div>
+      <div class="roadmap-intro-title">Iron Man 70.3 — Janeiro 2028</div>
+      <div class="roadmap-intro-sub">1,9km natação · 90km bike · 21,1km corrida</div>
+      <div class="roadmap-meta">
+        <div class="roadmap-meta-item">
+          <div class="roadmap-meta-val">3</div>
+          <div class="roadmap-meta-label">Fases</div>
+        </div>
+        <div class="roadmap-meta-item">
+          <div class="roadmap-meta-val">2</div>
+          <div class="roadmap-meta-label">Milestones</div>
+        </div>
+        <div class="roadmap-meta-item">
+          <div class="roadmap-meta-val">~19</div>
+          <div class="roadmap-meta-label">Meses</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline">
+
+      <!-- FASE 1 -->
+      <div class="tl-item">
+        <div class="tl-dot fase1"></div>
+        <div class="tl-card fase1 atual">
+          <div class="tl-atual-badge">● você está aqui</div>
+          <div class="tl-date">Julho 2026 → Novembro 2026</div>
+          <div class="tl-title">Fase 1 — Força, Corrida e Natação</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Construção da base aeróbica, introdução à natação com assessoria no mar, musculação 3x/semana. Meta: 1.500m contínuos na natação.</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-musculacao">Musculação</span>
+            <span class="tl-tag tag-corrida">Corrida</span>
+            <span class="tl-tag tag-natacao">Natação</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FÉRIAS -->
+      <div class="tl-item">
+        <div class="tl-dot ferias"></div>
+        <div class="tl-card ferias">
+          <div class="tl-date">Agosto 2026</div>
+          <div class="tl-title">Férias</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Pausa planejada. Retorno fim de agosto.</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-pausa">Pausa</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 2 -->
+      <div class="tl-item">
+        <div class="tl-dot fase2"></div>
+        <div class="tl-card fase2">
+          <div class="tl-date">Dezembro 2026 → Setembro 2027</div>
+          <div class="tl-title">Fase 2 — Força, Corrida, Natação e Bike</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Entrada da bike após atingir 1.500m contínuos na natação. Primeiro Sprint, depois Olímpico. Brick treinos (bike + corrida).</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-musculacao">Musculação</span>
+            <span class="tl-tag tag-corrida">Corrida</span>
+            <span class="tl-tag tag-natacao">Natação</span>
+            <span class="tl-tag tag-bike">Bike</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MILESTONE 1 -->
+      <div class="tl-item">
+        <div class="tl-dot m1"></div>
+        <div class="tl-card m1">
+          <div class="tl-date">Julho / Agosto 2027 · Data a definir</div>
+          <div class="tl-title">🏁 Milestone 1 — Triathlon Olímpico</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">1,5km natação · 40km bike · 10km corrida. Primeira prova de distância olímpica.</div>
+        </div>
+      </div>
+
+      <!-- FASE 3 -->
+      <div class="tl-item">
+        <div class="tl-dot fase3"></div>
+        <div class="tl-card fase3">
+          <div class="tl-date">Outubro 2027 → Janeiro 2028</div>
+          <div class="tl-title">Fase 3 — Prep Iron Man 70.3</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Pico de volume, simulações de prova completa, ajuste fino de nutrição e tapering para o dia da corrida.</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-corrida">Corrida</span>
+            <span class="tl-tag tag-natacao">Natação</span>
+            <span class="tl-tag tag-bike">Bike</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MILESTONE 2 -->
+      <div class="tl-item">
+        <div class="tl-dot m2"></div>
+        <div class="tl-card m2">
+          <div class="tl-date">Janeiro 2028</div>
+          <div class="tl-title">🏆 Milestone 2 — Iron Man 70.3</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">1,9km natação · 90km bike · 21,1km corrida. Fim do Projeto LS. Linha de chegada.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- BANNER LOGIN -->
+<div id="login-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;background:#1a1a1a;border:1px solid rgba(200,241,53,0.3);border-radius:12px;padding:14px 16px;z-index:150;align-items:center;gap:12px;">
+  <div style="flex:1;">
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Histórico offline</div>
+    <div style="font-size:12px;color:var(--text);">Entre com Google para sincronizar</div>
+  </div>
+  <button onclick="fazerLogin()" style="background:var(--accent);color:var(--black);border:none;border-radius:8px;padding:8px 14px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">
+    ENTRAR
+  </button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showScreen('grade',this)">
+    <span class="icon">📅</span><span>Grade</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('treino',this)">
+    <span class="icon">💪</span><span>Treinos</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('historico',this);renderHistorico()">
+    <span class="icon">📈</span><span>Evolução</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('roadmap',this)">
+    <span class="icon">🗺️</span><span>Roadmap</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     FIREBASE SDK
+     Substitua os valores abaixo com suas credenciais
+     do Firebase Console após criar o projeto.
+     ═══════════════════════════════════════════════ -->
+<script type="module">
+  // ── FIREBASE CONFIG ───────────────────────────
+  // Cole aqui o firebaseConfig do seu projeto
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyD5VBbVohHHCFD2iguXT0lYbNV9o5tZBJw",
+    authDomain:        "ironman-app-d4dfb.firebaseapp.com",
+    databaseURL:       "https://ironman-app-d4dfb-default-rtdb.firebaseio.com",
+    projectId:         "ironman-app-d4dfb",
+    storageBucket:     "ironman-app-d4dfb.firebasestorage.app",
+    messagingSenderId: "568914398906",
+    appId:             "1:568914398906:web:08b1ddd84059f6013c7c83"
+  };
+
+  const FIREBASE_READY = FIREBASE_CONFIG.apiKey !== "COLE_AQUI";
+
+  // ── CAMADA DE DADOS ───────────────────────────
+  // Funciona com localStorage agora.
+  // Quando Firebase estiver configurado, usa Firestore automaticamente.
+
+  let db = null;
+  let userId = 'local';
+
+  async function initFirebase() {
+    if (!FIREBASE_READY) {
+      setSyncStatus('local');
+      return;
+    }
+    try {
+      const { initializeApp }                                = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+      const { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, setPersistence, browserLocalPersistence, indexedDBLocalPersistence } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+      const { getDatabase, ref, set, get, child }           = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+
+      const app  = initializeApp(FIREBASE_CONFIG);
+      const auth = getAuth(app);
+      db = getDatabase(app);
+
+      window._rtdb = { ref, set, get, child };
+
+      // Força persistência local (sobrevive ao fechar/reabrir o app)
+      try {
+        await setPersistence(auth, indexedDBLocalPersistence);
+      } catch(e) {
+        try { await setPersistence(auth, browserLocalPersistence); } catch(e2) {}
+      }
+
+      // Trata retorno de redirect (caso popup tenha caído pra redirect)
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          userId = result.user.uid;
+        }
+      } catch(e) {
+        console.warn('getRedirectResult:', e);
+      }
+
+      onAuthStateChanged(auth, async user => {
+        if (user) {
+          userId = user.uid;
+          setSyncStatus('online');
+          const banner = document.getElementById('login-banner');
+          if (banner) banner.style.display = 'none';
+          await migrateLocalToFirebase();
+          renderHints();
+        } else {
+          setSyncStatus('local');
+          const banner = document.getElementById('login-banner');
+          if (banner) banner.style.display = 'flex';
+        }
+      });
+
+      // Detecta se está rodando como PWA (tela inicial)
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+      window.fazerLogin = async function() {
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        try {
+          if (isPWA) {
+            // PWA standalone: redirect é mais confiável
+            await signInWithRedirect(auth, provider);
+          } else {
+            // Safari/Chrome normal: popup funciona melhor
+            await signInWithPopup(auth, provider);
+          }
+        } catch(e) {
+          // Se popup falhar, tenta redirect
+          console.warn('Login popup falhou, tentando redirect', e);
+          try {
+            await signInWithRedirect(auth, provider);
+          } catch(e2) {
+            console.warn('Login falhou completamente', e2);
+            alert('Não foi possível conectar. Tente abrir pelo Safari primeiro, fazer login, e depois adicionar à tela inicial.');
+          }
+        }
+      };
+    } catch(e) {
+      console.warn('Firebase não disponível, usando localStorage.', e);
+      setSyncStatus('local');
+    }
+  }
+
+  // ── SYNC STATUS UI ────────────────────────────
+  function setSyncStatus(status) {
+    const dot   = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-label');
+    dot.className = 'sync-dot';
+    if (status === 'online')  { dot.classList.add('online');  label.textContent = 'online'; }
+    if (status === 'syncing') { dot.classList.add('syncing'); label.textContent = 'sync...'; }
+    if (status === 'local')   {                               label.textContent = 'local'; }
+    if (status === 'login')   {                               label.textContent = 'entrando...'; }
+    if (status === 'error')   { dot.classList.add('error');   label.textContent = 'erro'; }
+  }
+
+  // ── STORAGE ABSTRACTION ───────────────────────
+  function getLog() {
+    try { return JSON.parse(localStorage.getItem('ironlog') || '{}'); } catch(e) { return {}; }
+  }
+  function saveLog(log) {
+    localStorage.setItem('ironlog', JSON.stringify(log));
+  }
+
+  async function getEntries(exId) {
+    if (db && userId !== 'local') {
+      try {
+        const { ref, get } = window._rtdb;
+        const snap = await get(ref(db, `users/${userId}/exercises/${exId}`));
+        return snap.exists() ? (snap.val().entries || []) : [];
+      } catch(e) { /* fallback local */ }
+    }
+    return getLog()[exId] || [];
+  }
+
+  async function saveEntry(exId, entry) {
+    const log = getLog();
+    if (!log[exId]) log[exId] = [];
+    log[exId].push(entry);
+    saveLog(log);
+
+    if (db && userId !== 'local') {
+      setSyncStatus('syncing');
+      try {
+        const { ref, set } = window._rtdb;
+        await set(ref(db, `users/${userId}/exercises/${exId}`), { entries: log[exId] });
+        setSyncStatus('online');
+      } catch(e) {
+        setSyncStatus('error');
+      }
+    }
+  }
+
+  async function migrateLocalToFirebase() {
+    const log = getLog();
+    const ids = Object.keys(log);
+    if (ids.length === 0 || !db) return;
+    setSyncStatus('syncing');
+    try {
+      const { ref, set } = window._rtdb;
+      for (const exId of ids) {
+        await set(ref(db, `users/${userId}/exercises/${exId}`), { entries: log[exId] });
+      }
+      setSyncStatus('online');
+    } catch(e) {
+      setSyncStatus('error');
+    }
+  }
+
+  // ── HOJE DESTAQUE ─────────────────────────────
+  const hojeMap = {1:'seg',2:'ter',3:'qua',4:'qui',5:'sex',6:'sab',0:'dom'};
+  const hojeKey = hojeMap[new Date().getDay()];
+  const hojeRow = document.querySelector(`.week-row[data-day="${hojeKey}"]`);
+  if (hojeRow) {
+    hojeRow.classList.add('hoje');
+    hojeRow.style.position = 'relative';
+    const tag = document.createElement('div');
+    tag.className = 'hoje-tag';
+    tag.textContent = 'hoje';
+    hojeRow.insertBefore(tag, hojeRow.firstChild);
+  }
+
+  // ── NAV ───────────────────────────────────────
+  window.showScreen = function(id, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    btn.classList.add('active');
+  };
+
+  window.showPanel = function(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-a','active-b','active-c','active-core'));
+    document.getElementById('p' + id).classList.add('active');
+    btn.classList.add('active-' + id);
+  };
+
+  // ── HINTS ─────────────────────────────────────
+  function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+  }
+
+  window.renderHints = async function() {
+    for (const tr of document.querySelectorAll('tr[data-ex]')) {
+      const exId   = tr.dataset.ex;
+      const entries = await getEntries(exId);
+      const ultimo  = entries.length ? entries[entries.length - 1] : null;
+
+      let hint = tr.nextElementSibling;
+      if (hint && hint.classList.contains('ex-hint-row')) hint.remove();
+
+      const hintRow = document.createElement('tr');
+      hintRow.className = 'ex-hint-row';
+
+      if (ultimo) {
+        hintRow.innerHTML = `
+          <td></td>
+          <td colspan="3">
+            <div class="ex-hint">
+              <span class="hint-label">Último</span>
+              <span class="hint-val">${ultimo.peso}kg × ${ultimo.reps} reps</span>
+              <span class="hint-date">${formatDate(ultimo.date)}</span>
+              <button class="btn-reg" onclick="openModal('${exId}')">Registrar</button>
+            </div>
+          </td>`;
+      } else {
+        hintRow.innerHTML = `
+          <td></td>
+          <td colspan="3">
+            <div class="ex-hint">
+              <span class="hint-label" style="color:var(--muted)">Sem registro</span>
+              <button class="btn-reg" onclick="openModal('${exId}')">Registrar</button>
+            </div>
+          </td>`;
+      }
+      tr.after(hintRow);
+    }
+  };
+
+  // ── MODAL ─────────────────────────────────────
+  let modalExId = null;
+
+  window.openModal = async function(exId) {
+    modalExId = exId;
+    const entries = await getEntries(exId);
+    const ultimo  = entries.length ? entries[entries.length - 1] : null;
+    document.getElementById('m-peso').value = ultimo ? ultimo.peso : '';
+    document.getElementById('m-reps').value = ultimo ? ultimo.reps : '';
+    const exName = document.querySelector(`tr[data-ex="${exId}"] .ex-name`);
+    document.getElementById('m-title').textContent = exName ? exName.textContent : exId;
+    document.getElementById('modal-overlay').style.display = 'flex';
+    document.getElementById('m-peso').focus();
+  };
+
+  window.closeModal = function() {
+    document.getElementById('modal-overlay').style.display = 'none';
+    modalExId = null;
+  };
+
+  window.salvarRegistro = async function() {
+    const peso = parseFloat(document.getElementById('m-peso').value);
+    const reps = parseInt(document.getElementById('m-reps').value);
+    if (!modalExId || isNaN(peso) || isNaN(reps)) return;
+    await saveEntry(modalExId, { date: new Date().toISOString(), peso, reps });
+    closeModal();
+    renderHints();
+  };
+
+  document.addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  });
+
+  // ── HISTÓRICO ─────────────────────────────────
+  const ALL_EXERCISES = [
+    {id:'back-squat',       name:'Back Squat'},
+    {id:'rdl-barra',        name:'RDL com Barra'},
+    {id:'supino-inc-halt',  name:'Supino Inclinado c/ Halteres'},
+    {id:'desenv-halt',      name:'Desenvolvimento c/ Halteres'},
+    {id:'crucifixo-cabo',   name:'Crucifixo no Cabo'},
+    {id:'elev-lat-cabo',    name:'Elevação Lateral no Cabo'},
+    {id:'remada-alta-cabo', name:'Remada Alta no Cabo'},
+    {id:'front-squat',      name:'Front Squat'},
+    {id:'puxada-neutra',    name:'Puxada Pegada Neutra'},
+    {id:'remada-curv-barra',name:'Remada Curvada c/ Barra'},
+    {id:'puxada-aberta',    name:'Puxada Aberta'},
+    {id:'remada-baixa-cabo',name:'Remada Baixa no Cabo'},
+    {id:'cadeira-ext',      name:'Cadeira Extensora'},
+    {id:'paralelas',        name:'Paralelas'},
+    {id:'remada-curv-b2',   name:'Remada Curvada (C)'},
+  ];
+
+  window.renderHistorico = async function() {
+    const cont = document.getElementById('hist-content');
+    cont.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">carregando...</div>`;
+
+    const results = await Promise.all(ALL_EXERCISES.map(async ex => ({
+      ...ex, entries: await getEntries(ex.id)
+    })));
+
+    const comDados = results.filter(ex => ex.entries.length > 0);
+
+    if (comDados.length === 0) {
+      cont.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">Nenhum registro ainda.<br><br>Registre o peso nos treinos.</div>`;
+      return;
+    }
+
+    let html = '';
+    comDados.forEach(ex => {
+      const { entries } = ex;
+      const ultimo = entries[entries.length - 1];
+      const max    = Math.max(...entries.map(e => e.peso));
+      const w = 120, h = 36, pad = 4;
+      const pesos  = entries.map(e => e.peso);
+      const minP   = Math.min(...pesos), maxP = Math.max(...pesos);
+      const range  = maxP - minP || 1;
+      const pts    = pesos.map((p, i) => {
+        const x = pad + (i / Math.max(pesos.length - 1, 1)) * (w - pad * 2);
+        const y = h - pad - ((p - minP) / range) * (h - pad * 2);
+        return `${x},${y}`;
+      }).join(' ');
+
+      html += `
+      <div class="hist-card">
+        <div class="hist-ex-name">${ex.name}</div>
+        <div class="hist-row">
+          <div>
+            <div class="hist-stat-label">Último</div>
+            <div class="hist-stat-val">${ultimo.peso}kg <span style="color:var(--muted);font-size:11px;">× ${ultimo.reps}r</span></div>
+            <div class="hist-stat-date">${formatDate(ultimo.date)}</div>
+          </div>
+          <div>
+            <div class="hist-stat-label">Máximo</div>
+            <div class="hist-stat-val" style="color:var(--accent)">${max}kg</div>
+            <div class="hist-stat-date">${entries.length} registro${entries.length > 1 ? 's' : ''}</div>
+          </div>
+          <svg width="${w}" height="${h}" style="flex-shrink:0">
+            ${pesos.length > 1 ? `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>` : ''}
+            ${pesos.map((p, i) => {
+              const x = pad + (i / Math.max(pesos.length - 1, 1)) * (w - pad * 2);
+              const y = h - pad - ((p - minP) / range) * (h - pad * 2);
+              return `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--accent)"/>`;
+            }).join('')}
+          </svg>
+        </div>
+      </div>`;
+    });
+
+    cont.innerHTML = html;
+  };
+
+  // ── INIT ──────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  initFirebase();
+  renderHints();
+</script>
+
+<!-- MODAL REGISTRO -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:flex-end;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid var(--border);border-radius:16px 16px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;">
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Registrar última série</div>
+    <div id="m-title" style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:20px;"></div>
+    <div style="display:flex;gap:12px;margin-bottom:20px;">
+      <div style="flex:1;">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Peso (kg)</div>
+        <input id="m-peso" type="number" step="0.5" min="0" placeholder="ex: 80"
+          style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:20px;font-weight:700;color:var(--white);font-family:'Space Mono',monospace;outline:none;-webkit-appearance:none;">
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Reps</div>
+        <input id="m-reps" type="number" min="1" placeholder="ex: 6"
+          style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:20px;font-weight:700;color:var(--white);font-family:'Space Mono',monospace;outline:none;-webkit-appearance:none;">
+      </div>
+    </div>
+    <button onclick="salvarRegistro()"
+      style="width:100%;background:var(--accent);color:var(--black);border:none;border-radius:10px;padding:14px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:0.08em;cursor:pointer;">
+      SALVAR
+    </button>
+    <button onclick="closeModal()"
+      style="width:100%;background:none;border:none;color:var(--muted);padding:12px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;margin-top:4px;">
+      cancelar
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
