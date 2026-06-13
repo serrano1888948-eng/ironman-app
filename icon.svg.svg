@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0a0a0a"/>
+  
+  <!-- Capacete - forma principal -->
+  <path d="M256 60 C170 60 120 130 115 200 L110 300 C108 340 120 370 140 390 L160 410 L352 410 L372 390 C392 370 404 340 402 300 L397 200 C392 130 342 60 256 60Z" fill="none" stroke="#C8F135" stroke-width="6"/>
+  
+  <!-- Divisória central horizontal -->
+  <line x1="115" y1="280" x2="397" y2="280" stroke="#C8F135" stroke-width="4"/>
+  
+  <!-- Olho esquerdo -->
+  <rect x="140" y="220" width="90" height="42" rx="6" fill="#C8F135" opacity="0.15" stroke="#C8F135" stroke-width="4"/>
+  <!-- Olho direito -->
+  <rect x="282" y="220" width="90" height="42" rx="6" fill="#C8F135" opacity="0.15" stroke="#C8F135" stroke-width="4"/>
+  
+  <!-- Nariz central -->
+  <rect x="245" y="220" width="22" height="42" fill="#0a0a0a"/>
+  
+  <!-- Divisória vertical topo -->
+  <line x1="256" y1="60" x2="256" y2="220" stroke="#C8F135" stroke-width="3" stroke-dasharray="6,4"/>
+  
+  <!-- Bocal - grelha -->
+  <rect x="195" y="330" width="35" height="14" rx="4" fill="none" stroke="#C8F135" stroke-width="3"/>
+  <rect x="239" y="330" width="35" height="14" rx="4" fill="none" stroke="#C8F135" stroke-width="3"/>
+  <rect x="283" y="330" width="35" height="14" rx="4" fill="none" stroke="#C8F135" stroke-width="3"/>
+
+  <!-- Linhas laterais capacete -->
+  <path d="M140 200 C130 220 118 250 115 280" fill="none" stroke="#C8F135" stroke-width="3" opacity="0.5"/>
+  <path d="M372 200 C382 220 394 250 397 280" fill="none" stroke="#C8F135" stroke-width="3" opacity="0.5"/>
+
+  <!-- Detalhe topo -->
+  <rect x="236" y="52" width="40" height="16" rx="4" fill="none" stroke="#C8F135" stroke-width="3"/>
+</svg>
