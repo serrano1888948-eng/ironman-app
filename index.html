@@ -1621,6 +1621,14 @@
       });
 
       const data = await analyzeRes.json();
+
+      if (!analyzeRes.ok || data.error) {
+        result.innerHTML = `<div style="font-size:12px;color:#ff6b6b;text-align:center;padding:20px;">Erro do servidor:<br><br><span style="font-family:'Space Mono',monospace;font-size:10px;">${data.error || analyzeRes.status}</span></div>`;
+        btn.disabled = false;
+        btn.textContent = '⚡ ANALISAR MEUS TREINOS';
+        return;
+      }
+
       const text = data.analysis || 'Erro ao gerar análise.';
 
       // Salva no localStorage
