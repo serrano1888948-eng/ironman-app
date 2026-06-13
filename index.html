@@ -41,10 +41,49 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* SYNC STATUS */
+  .sync-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--border);
+    z-index: 300;
+  }
+  .sync-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .sync-indicator {
+    position: fixed;
+    top: 8px;
+    right: 12px;
+    z-index: 300;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .sync-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+  .sync-dot.online { background: var(--accent); }
+  .sync-dot.syncing { background: var(--orange); animation: pulse 1s infinite; }
+  .sync-dot.error { background: #ff6b6b; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* BOTTOM NAV */
   .bottom-nav {
     position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
+    bottom: 0; left: 0; right: 0;
     background: #111;
     border-top: 1px solid var(--border);
     display: flex;
@@ -69,18 +108,18 @@
     text-transform: uppercase;
     transition: color 0.2s;
   }
-
   .nav-btn.active { color: var(--accent); }
   .nav-btn .icon { font-size: 18px; }
 
+  /* SCREENS */
   .screen { display: none; padding: 0 0 80px; }
   .screen.active { display: block; }
 
+  /* HEADER */
   header {
     padding: 52px 16px 16px;
     border-bottom: 1px solid var(--border);
   }
-
   .tag {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -90,12 +129,11 @@
     display: block;
     margin-bottom: 6px;
   }
-
   h1 { font-size: 20px; font-weight: 700; color: var(--white); }
   h1 span { color: var(--accent); }
 
+  /* GRADE */
   .week-header { padding: 16px 16px 8px; }
-
   .week-title {
     font-family: 'Space Mono', monospace;
     font-size: 10px;
@@ -104,14 +142,7 @@
     color: var(--muted);
     margin-bottom: 12px;
   }
-
-  .week-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 0 16px 16px;
-  }
-
+  .week-grid { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; }
   .week-row {
     background: var(--card);
     border: 1px solid var(--border);
@@ -121,12 +152,11 @@
     align-items: center;
     gap: 14px;
   }
-
   .week-row.treino-a { border-left: 3px solid var(--accent); }
   .week-row.treino-b { border-left: 3px solid var(--orange); }
   .week-row.treino-c { border-left: 3px solid var(--blue); }
-  .week-row.natacao { border-left: 3px solid var(--purple); }
-  .week-row.corrida { border-left: 3px solid #ff6b6b; }
+  .week-row.natacao  { border-left: 3px solid var(--purple); }
+  .week-row.corrida  { border-left: 3px solid #ff6b6b; }
   .week-row.descanso { border-left: 3px solid var(--border); opacity: 0.6; }
 
   .week-day {
@@ -137,11 +167,9 @@
     width: 36px;
     flex-shrink: 0;
   }
-
   .week-info { flex: 1; }
   .week-activity { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 2px; }
   .week-detail { font-size: 11px; color: var(--muted); }
-
   .week-badge {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -150,13 +178,73 @@
     font-weight: 700;
     flex-shrink: 0;
   }
-
-  .badge-a { background: var(--accent-dim); color: var(--accent); }
-  .badge-b { background: var(--orange-dim); color: var(--orange); }
-  .badge-c { background: var(--blue-dim); color: var(--blue); }
+  .badge-a   { background: var(--accent-dim); color: var(--accent); }
+  .badge-b   { background: var(--orange-dim); color: var(--orange); }
+  .badge-c   { background: var(--blue-dim);   color: var(--blue); }
   .badge-nat { background: var(--purple-dim); color: var(--purple); }
   .badge-run { background: rgba(255,107,107,0.1); color: #ff6b6b; }
 
+  /* HOJE */
+  .week-row.hoje {
+    box-shadow: 0 0 0 1.5px var(--accent);
+    background: rgba(200,241,53,0.05);
+    position: relative;
+  }
+  .week-row.hoje.corrida  { box-shadow: 0 0 0 1.5px #ff6b6b;       background: rgba(255,107,107,0.06); }
+  .week-row.hoje.natacao  { box-shadow: 0 0 0 1.5px var(--purple);  background: rgba(181,122,255,0.06); }
+  .week-row.hoje.treino-b { box-shadow: 0 0 0 1.5px var(--orange);  background: rgba(255,140,66,0.06); }
+  .week-row.hoje.treino-c { box-shadow: 0 0 0 1.5px var(--blue);    background: rgba(77,159,255,0.06); }
+  .week-row.hoje.descanso { box-shadow: 0 0 0 1.5px var(--muted); }
+  .hoje-tag {
+    position: absolute;
+    top: -9px; left: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--black);
+    padding: 1px 7px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .week-row.hoje.corrida  .hoje-tag { background: #ff6b6b; }
+  .week-row.hoje.natacao  .hoje-tag { background: var(--purple); }
+  .week-row.hoje.treino-b .hoje-tag { background: var(--orange); }
+  .week-row.hoje.treino-c .hoje-tag { background: var(--blue); }
+
+  /* VOLUME */
+  .volume-card {
+    margin: 0 16px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .volume-card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .volume-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(39,39,39,0.5);
+    gap: 10px;
+  }
+  .volume-row:last-child { border-bottom: none; }
+  .volume-muscle { flex: 1; font-size: 12px; font-weight: 600; color: var(--white); }
+  .volume-bar-wrap { width: 80px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .volume-bar { height: 100%; border-radius: 2px; }
+  .volume-num { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--white); width: 24px; text-align: right; }
+  .volume-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); width: 40px; text-align: right; }
+
+  /* TABS */
   .tabs {
     display: flex;
     border-bottom: 1px solid var(--border);
@@ -165,7 +253,6 @@
     padding: 0 4px;
   }
   .tabs::-webkit-scrollbar { display: none; }
-
   .tab {
     flex-shrink: 0;
     padding: 12px 16px;
@@ -179,27 +266,26 @@
     border-bottom: 2px solid transparent;
     background: none;
   }
-
-  .tab.active-a { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab.active-b { color: var(--orange); border-bottom-color: var(--orange); }
-  .tab.active-c { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab.active-a    { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab.active-b    { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab.active-c    { color: var(--blue);   border-bottom-color: var(--blue); }
   .tab.active-core { color: var(--accent); border-bottom-color: var(--accent); }
 
+  /* PANELS */
   .panel { display: none; padding: 16px; }
   .panel.active { display: block; }
 
+  /* TREINO HEADER */
   .treino-header {
     border-radius: 8px;
     padding: 12px 14px;
     margin-bottom: 16px;
     border: 1px solid;
   }
-
-  .treino-header.a { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
-  .treino-header.b { background: var(--orange-dim); border-color: rgba(255,140,66,0.2); }
-  .treino-header.c { background: var(--blue-dim); border-color: rgba(77,159,255,0.2); }
+  .treino-header.a    { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
+  .treino-header.b    { background: var(--orange-dim); border-color: rgba(255,140,66,0.2); }
+  .treino-header.c    { background: var(--blue-dim);   border-color: rgba(77,159,255,0.2); }
   .treino-header.core { background: var(--accent-dim); border-color: rgba(200,241,53,0.2); }
-
   .treino-day {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -207,18 +293,16 @@
     text-transform: uppercase;
     margin-bottom: 3px;
   }
-
   .treino-header.a .treino-day,
   .treino-header.core .treino-day { color: var(--accent); }
-  .treino-header.b .treino-day { color: var(--orange); }
-  .treino-header.c .treino-day { color: var(--blue); }
-
+  .treino-header.b .treino-day    { color: var(--orange); }
+  .treino-header.c .treino-day    { color: var(--blue); }
   .treino-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
   .treino-meta { font-size: 11px; color: var(--muted); display: flex; gap: 12px; }
 
+  /* TABLE */
   .ex-table { width: 100%; border-collapse: collapse; }
   .ex-table thead tr { border-bottom: 1px solid var(--border); }
-
   .ex-table th {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -229,28 +313,17 @@
     text-align: left;
     font-weight: 400;
   }
-
   .ex-table th:last-child { text-align: right; }
   .ex-table tbody tr { border-bottom: 1px solid rgba(39,39,39,0.6); }
   .ex-table tbody tr:last-child { border-bottom: none; }
   .ex-table td { padding: 11px 8px; vertical-align: middle; }
-
-  .ex-num { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); width: 20px; }
+  .ex-num  { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); width: 20px; }
   .ex-name { font-size: 13px; font-weight: 600; color: var(--white); }
-
-  .ex-dose {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--white);
-    white-space: nowrap;
-    text-align: center;
-  }
-
+  .ex-dose { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: var(--white); white-space: nowrap; text-align: center; }
   .ex-fail { font-size: 10px; text-align: right; white-space: nowrap; }
   .fail-rir { color: #ff6b6b; }
   .fail-opt { color: var(--orange); }
-  .fail-go { color: var(--accent); }
+  .fail-go  { color: var(--accent); }
 
   .time-badge {
     display: inline-flex;
@@ -274,7 +347,6 @@
     border-radius: 8px;
     padding: 12px 14px;
   }
-
   .leg-title {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -283,113 +355,11 @@
     color: var(--muted);
     margin-bottom: 10px;
   }
-
-  .leg-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 8px;
-    font-size: 12px;
-    line-height: 1.4;
-  }
+  .leg-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 12px; line-height: 1.4; }
   .leg-item:last-child { margin-bottom: 0; }
+  .leg-dot { flex-shrink: 0; margin-top: 3px; font-size: 10px; font-family: 'Space Mono', monospace; }
 
-  .leg-dot {
-    flex-shrink: 0;
-    margin-top: 3px;
-    font-size: 10px;
-    font-family: 'Space Mono', monospace;
-  }
-
-  /* HOJE */
-  .week-row.hoje {
-    box-shadow: 0 0 0 1.5px var(--accent);
-    background: rgba(200,241,53,0.05);
-    position: relative;
-  }
-  .week-row.hoje.corrida { box-shadow: 0 0 0 1.5px #ff6b6b; background: rgba(255,107,107,0.06); }
-  .week-row.hoje.natacao { box-shadow: 0 0 0 1.5px var(--purple); background: rgba(181,122,255,0.06); }
-  .week-row.hoje.treino-b { box-shadow: 0 0 0 1.5px var(--orange); background: rgba(255,140,66,0.06); }
-  .week-row.hoje.treino-c { box-shadow: 0 0 0 1.5px var(--blue); background: rgba(77,159,255,0.06); }
-  .week-row.hoje.descanso { box-shadow: 0 0 0 1.5px var(--muted); }
-
-  .hoje-tag {
-    position: absolute;
-    top: -9px;
-    left: 14px;
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    background: var(--accent);
-    color: var(--black);
-    padding: 1px 7px;
-    border-radius: 20px;
-    font-weight: 700;
-  }
-  .week-row.hoje.corrida .hoje-tag { background: #ff6b6b; }
-  .week-row.hoje.natacao .hoje-tag { background: var(--purple); }
-  .week-row.hoje.treino-b .hoje-tag { background: var(--orange); }
-  .week-row.hoje.treino-c .hoje-tag { background: var(--blue); }
-
-  /* CARD VOLUME */
-  .volume-card {
-    margin: 0 16px 16px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .volume-card-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 10px 14px 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .volume-row {
-    display: flex;
-    align-items: center;
-    padding: 9px 14px;
-    border-bottom: 1px solid rgba(39,39,39,0.5);
-    gap: 10px;
-  }
-  .volume-row:last-child { border-bottom: none; }
-
-  .volume-muscle { flex: 1; font-size: 12px; font-weight: 600; color: var(--white); }
-
-  .volume-bar-wrap {
-    width: 80px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .volume-bar { height: 100%; border-radius: 2px; }
-
-  .volume-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--white);
-    width: 24px;
-    text-align: right;
-  }
-
-  .volume-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    width: 40px;
-    text-align: right;
-  }
-
-  /* REGISTRO DE PESO */
+  /* REGISTRO */
   .ex-hint-row td { padding: 0 8px 10px; }
   .ex-hint {
     display: flex;
@@ -400,22 +370,9 @@
     border-radius: 6px;
     padding: 6px 10px;
   }
-  .hint-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    flex-shrink: 0;
-  }
-  .hint-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    flex: 1;
-  }
-  .hint-date { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+  .hint-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
+  .hint-val   { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent); flex: 1; }
+  .hint-date  { font-size: 10px; color: var(--muted); flex-shrink: 0; }
   .btn-reg {
     flex-shrink: 0;
     background: var(--accent-dim);
@@ -441,16 +398,9 @@
   }
   .hist-ex-name { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 12px; }
   .hist-row { display: flex; align-items: center; gap: 16px; }
-  .hist-stat-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 2px;
-  }
-  .hist-stat-val { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
-  .hist-stat-date { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .hist-stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .hist-stat-val   { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+  .hist-stat-date  { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
   footer {
     border-top: 1px solid var(--border);
@@ -465,6 +415,13 @@
 </style>
 </head>
 <body>
+
+<!-- SYNC BAR -->
+<div class="sync-bar"><div class="sync-bar-fill" id="sync-fill"></div></div>
+<div class="sync-indicator">
+  <div class="sync-dot" id="sync-dot"></div>
+  <span id="sync-label">local</span>
+</div>
 
 <!-- GRADE SCREEN -->
 <div id="screen-grade" class="screen active">
@@ -486,7 +443,6 @@
       </div>
       <span class="week-badge badge-a">MUSCULAÇÃO</span>
     </div>
-
     <div class="week-row natacao" data-day="ter">
       <div class="week-day">Ter</div>
       <div class="week-info">
@@ -495,7 +451,6 @@
       </div>
       <span class="week-badge badge-nat">NATAÇÃO</span>
     </div>
-
     <div class="week-row corrida" data-day="qua">
       <div class="week-day">Qua</div>
       <div class="week-info">
@@ -504,7 +459,6 @@
       </div>
       <span class="week-badge badge-run">CORRIDA</span>
     </div>
-
     <div class="week-row treino-b" data-day="qui">
       <div class="week-day">Qui</div>
       <div class="week-info">
@@ -513,7 +467,6 @@
       </div>
       <span class="week-badge badge-b">DUPLO</span>
     </div>
-
     <div class="week-row corrida" data-day="sex">
       <div class="week-day">Sex</div>
       <div class="week-info">
@@ -522,7 +475,6 @@
       </div>
       <span class="week-badge badge-run">CORRIDA</span>
     </div>
-
     <div class="week-row treino-c" data-day="sab">
       <div class="week-day">Sáb</div>
       <div class="week-info">
@@ -531,7 +483,6 @@
       </div>
       <span class="week-badge badge-c">MUSCULAÇÃO</span>
     </div>
-
     <div class="week-row corrida" data-day="dom">
       <div class="week-day">Dom</div>
       <div class="week-info">
@@ -550,38 +501,32 @@
     <div class="volume-row">
       <div class="volume-muscle">Quadríceps</div>
       <div class="volume-bar-wrap"><div class="volume-bar" style="width:85%;background:#C8F135;"></div></div>
-      <div class="volume-num">11</div>
-      <div class="volume-label">séries</div>
+      <div class="volume-num">11</div><div class="volume-label">séries</div>
     </div>
     <div class="volume-row">
       <div class="volume-muscle">Posterior / Glúteo</div>
       <div class="volume-bar-wrap"><div class="volume-bar" style="width:92%;background:#C8F135;"></div></div>
-      <div class="volume-num">12</div>
-      <div class="volume-label">séries</div>
+      <div class="volume-num">12</div><div class="volume-label">séries</div>
     </div>
     <div class="volume-row">
       <div class="volume-muscle">Peito</div>
       <div class="volume-bar-wrap"><div class="volume-bar" style="width:84%;background:#FF8C42;"></div></div>
-      <div class="volume-num">11</div>
-      <div class="volume-label">séries</div>
+      <div class="volume-num">11</div><div class="volume-label">séries</div>
     </div>
     <div class="volume-row">
       <div class="volume-muscle">Costas</div>
       <div class="volume-bar-wrap"><div class="volume-bar" style="width:100%;background:#FF8C42;"></div></div>
-      <div class="volume-num">13</div>
-      <div class="volume-label">séries</div>
+      <div class="volume-num">13</div><div class="volume-label">séries</div>
     </div>
     <div class="volume-row">
       <div class="volume-muscle">Ombro</div>
       <div class="volume-bar-wrap"><div class="volume-bar" style="width:69%;background:#4d9fff;"></div></div>
-      <div class="volume-num">9</div>
-      <div class="volume-label">séries</div>
+      <div class="volume-num">9</div><div class="volume-label">séries</div>
     </div>
     <div class="volume-row">
       <div class="volume-muscle">Core</div>
       <div class="volume-bar-wrap"><div class="volume-bar" style="width:46%;background:#b57aff;"></div></div>
-      <div class="volume-num">6</div>
-      <div class="volume-label">séries</div>
+      <div class="volume-num">6</div><div class="volume-label">séries</div>
     </div>
   </div>
 
@@ -721,51 +666,95 @@
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <button class="nav-btn active" onclick="showScreen('grade', this)">
-    <span class="icon">📅</span>
-    <span>Grade</span>
+  <button class="nav-btn active" onclick="showScreen('grade',this)">
+    <span class="icon">📅</span><span>Grade</span>
   </button>
-  <button class="nav-btn" onclick="showScreen('treino', this)">
-    <span class="icon">💪</span>
-    <span>Treinos</span>
+  <button class="nav-btn" onclick="showScreen('treino',this)">
+    <span class="icon">💪</span><span>Treinos</span>
   </button>
-  <button class="nav-btn" onclick="showScreen('historico', this); renderHistorico()">
-    <span class="icon">📈</span>
-    <span>Evolução</span>
+  <button class="nav-btn" onclick="showScreen('historico',this);renderHistorico()">
+    <span class="icon">📈</span><span>Evolução</span>
   </button>
 </div>
 
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+<!-- ═══════════════════════════════════════════════
+     FIREBASE SDK
+     Substitua os valores abaixo com suas credenciais
+     do Firebase Console após criar o projeto.
+     ═══════════════════════════════════════════════ -->
+<script type="module">
+  // ── FIREBASE CONFIG ───────────────────────────
+  // Cole aqui o firebaseConfig do seu projeto
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyD5VBbVohHHCFD2iguXT0lYbNV9o5tZBJw",
+    authDomain:        "ironman-app-d4dfb.firebaseapp.com",
+    databaseURL:       "https://ironman-app-d4dfb-default-rtdb.firebaseio.com",
+    projectId:         "ironman-app-d4dfb",
+    storageBucket:     "ironman-app-d4dfb.firebasestorage.app",
+    messagingSenderId: "568914398906",
+    appId:             "1:568914398906:web:08b1ddd84059f6013c7c83"
+  };
+
+  const FIREBASE_READY = FIREBASE_CONFIG.apiKey !== "COLE_AQUI";
+
+  // ── CAMADA DE DADOS ───────────────────────────
+  // Funciona com localStorage agora.
+  // Quando Firebase estiver configurado, usa Firestore automaticamente.
+
+  let db = null;
+  let userId = 'local';
+
+  async function initFirebase() {
+    if (!FIREBASE_READY) {
+      setSyncStatus('local');
+      return;
+    }
+    try {
+      const { initializeApp }                                = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+      const { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+      const { getDatabase, ref, set, get, child }           = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js');
+
+      const app  = initializeApp(FIREBASE_CONFIG);
+      const auth = getAuth(app);
+      db = getDatabase(app);
+
+      window._rtdb = { ref, set, get, child };
+
+      onAuthStateChanged(auth, async user => {
+        if (user) {
+          userId = user.uid;
+          setSyncStatus('online');
+          await migrateLocalToFirebase();
+          renderHints();
+        } else {
+          setSyncStatus('login');
+          const provider = new GoogleAuthProvider();
+          try {
+            await signInWithPopup(auth, provider);
+          } catch(e) {
+            setSyncStatus('local');
+          }
+        }
+      });
+    } catch(e) {
+      console.warn('Firebase não disponível, usando localStorage.', e);
+      setSyncStatus('local');
+    }
   }
 
-  const hojeMap = {1:'seg',2:'ter',3:'qua',4:'qui',5:'sex',6:'sab',0:'dom'};
-  const hoje = hojeMap[new Date().getDay()];
-  const row = document.querySelector('.week-row[data-day="' + hoje + '"]');
-  if (row) {
-    row.classList.add('hoje');
-    row.style.position = 'relative';
-    const tag = document.createElement('div');
-    tag.className = 'hoje-tag';
-    tag.textContent = 'hoje';
-    row.insertBefore(tag, row.firstChild);
+  // ── SYNC STATUS UI ────────────────────────────
+  function setSyncStatus(status) {
+    const dot   = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-label');
+    dot.className = 'sync-dot';
+    if (status === 'online')  { dot.classList.add('online');  label.textContent = 'online'; }
+    if (status === 'syncing') { dot.classList.add('syncing'); label.textContent = 'sync...'; }
+    if (status === 'local')   {                               label.textContent = 'local'; }
+    if (status === 'login')   {                               label.textContent = 'entrando...'; }
+    if (status === 'error')   { dot.classList.add('error');   label.textContent = 'erro'; }
   }
 
-  function showScreen(id, btn) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('screen-' + id).classList.add('active');
-    btn.classList.add('active');
-  }
-
-  function showPanel(id, btn) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-a','active-b','active-c','active-core'));
-    document.getElementById('p'+id).classList.add('active');
-    btn.classList.add('active-' + id);
-  }
-
+  // ── STORAGE ABSTRACTION ───────────────────────
   function getLog() {
     try { return JSON.parse(localStorage.getItem('ironlog') || '{}'); } catch(e) { return {}; }
   }
@@ -773,21 +762,97 @@
     localStorage.setItem('ironlog', JSON.stringify(log));
   }
 
-  function getUltimo(exId) {
-    const log = getLog();
-    const entries = log[exId];
-    if (!entries || entries.length === 0) return null;
-    return entries[entries.length - 1];
+  async function getEntries(exId) {
+    if (db && userId !== 'local') {
+      try {
+        const { ref, get } = window._rtdb;
+        const snap = await get(ref(db, `users/${userId}/exercises/${exId}`));
+        return snap.exists() ? (snap.val().entries || []) : [];
+      } catch(e) { /* fallback local */ }
+    }
+    return getLog()[exId] || [];
   }
 
-  function renderHints() {
-    document.querySelectorAll('tr[data-ex]').forEach(tr => {
-      const exId = tr.dataset.ex;
-      const ultimo = getUltimo(exId);
+  async function saveEntry(exId, entry) {
+    const log = getLog();
+    if (!log[exId]) log[exId] = [];
+    log[exId].push(entry);
+    saveLog(log);
+
+    if (db && userId !== 'local') {
+      setSyncStatus('syncing');
+      try {
+        const { ref, set } = window._rtdb;
+        await set(ref(db, `users/${userId}/exercises/${exId}`), { entries: log[exId] });
+        setSyncStatus('online');
+      } catch(e) {
+        setSyncStatus('error');
+      }
+    }
+  }
+
+  async function migrateLocalToFirebase() {
+    const log = getLog();
+    const ids = Object.keys(log);
+    if (ids.length === 0 || !db) return;
+    setSyncStatus('syncing');
+    try {
+      const { ref, set } = window._rtdb;
+      for (const exId of ids) {
+        await set(ref(db, `users/${userId}/exercises/${exId}`), { entries: log[exId] });
+      }
+      setSyncStatus('online');
+    } catch(e) {
+      setSyncStatus('error');
+    }
+  }
+
+  // ── HOJE DESTAQUE ─────────────────────────────
+  const hojeMap = {1:'seg',2:'ter',3:'qua',4:'qui',5:'sex',6:'sab',0:'dom'};
+  const hojeKey = hojeMap[new Date().getDay()];
+  const hojeRow = document.querySelector(`.week-row[data-day="${hojeKey}"]`);
+  if (hojeRow) {
+    hojeRow.classList.add('hoje');
+    hojeRow.style.position = 'relative';
+    const tag = document.createElement('div');
+    tag.className = 'hoje-tag';
+    tag.textContent = 'hoje';
+    hojeRow.insertBefore(tag, hojeRow.firstChild);
+  }
+
+  // ── NAV ───────────────────────────────────────
+  window.showScreen = function(id, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    btn.classList.add('active');
+  };
+
+  window.showPanel = function(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active-a','active-b','active-c','active-core'));
+    document.getElementById('p' + id).classList.add('active');
+    btn.classList.add('active-' + id);
+  };
+
+  // ── HINTS ─────────────────────────────────────
+  function formatDate(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+  }
+
+  window.renderHints = async function() {
+    for (const tr of document.querySelectorAll('tr[data-ex]')) {
+      const exId   = tr.dataset.ex;
+      const entries = await getEntries(exId);
+      const ultimo  = entries.length ? entries[entries.length - 1] : null;
+
       let hint = tr.nextElementSibling;
       if (hint && hint.classList.contains('ex-hint-row')) hint.remove();
+
       const hintRow = document.createElement('tr');
       hintRow.className = 'ex-hint-row';
+
       if (ultimo) {
         hintRow.innerHTML = `
           <td></td>
@@ -810,72 +875,70 @@
           </td>`;
       }
       tr.after(hintRow);
-    });
-  }
+    }
+  };
 
-  function formatDate(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
-  }
-
+  // ── MODAL ─────────────────────────────────────
   let modalExId = null;
 
-  function openModal(exId) {
+  window.openModal = async function(exId) {
     modalExId = exId;
-    const ultimo = getUltimo(exId);
+    const entries = await getEntries(exId);
+    const ultimo  = entries.length ? entries[entries.length - 1] : null;
     document.getElementById('m-peso').value = ultimo ? ultimo.peso : '';
     document.getElementById('m-reps').value = ultimo ? ultimo.reps : '';
     const exName = document.querySelector(`tr[data-ex="${exId}"] .ex-name`);
     document.getElementById('m-title').textContent = exName ? exName.textContent : exId;
     document.getElementById('modal-overlay').style.display = 'flex';
     document.getElementById('m-peso').focus();
-  }
+  };
 
-  function closeModal() {
+  window.closeModal = function() {
     document.getElementById('modal-overlay').style.display = 'none';
     modalExId = null;
-  }
+  };
 
-  function salvarRegistro() {
+  window.salvarRegistro = async function() {
     const peso = parseFloat(document.getElementById('m-peso').value);
     const reps = parseInt(document.getElementById('m-reps').value);
     if (!modalExId || isNaN(peso) || isNaN(reps)) return;
-    const log = getLog();
-    if (!log[modalExId]) log[modalExId] = [];
-    log[modalExId].push({ date: new Date().toISOString(), peso, reps });
-    saveLog(log);
+    await saveEntry(modalExId, { date: new Date().toISOString(), peso, reps });
     closeModal();
     renderHints();
-  }
+  };
 
   document.addEventListener('click', e => {
-    const overlay = document.getElementById('modal-overlay');
-    if (e.target === overlay) closeModal();
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
   });
 
+  // ── HISTÓRICO ─────────────────────────────────
   const ALL_EXERCISES = [
-    {id:'back-squat', name:'Back Squat'},
-    {id:'rdl-barra', name:'RDL com Barra'},
-    {id:'supino-inc-halt', name:'Supino Inclinado c/ Halteres'},
-    {id:'desenv-halt', name:'Desenvolvimento c/ Halteres'},
-    {id:'crucifixo-cabo', name:'Crucifixo no Cabo'},
-    {id:'elev-lat-cabo', name:'Elevação Lateral no Cabo'},
+    {id:'back-squat',       name:'Back Squat'},
+    {id:'rdl-barra',        name:'RDL com Barra'},
+    {id:'supino-inc-halt',  name:'Supino Inclinado c/ Halteres'},
+    {id:'desenv-halt',      name:'Desenvolvimento c/ Halteres'},
+    {id:'crucifixo-cabo',   name:'Crucifixo no Cabo'},
+    {id:'elev-lat-cabo',    name:'Elevação Lateral no Cabo'},
     {id:'remada-alta-cabo', name:'Remada Alta no Cabo'},
-    {id:'front-squat', name:'Front Squat'},
-    {id:'puxada-neutra', name:'Puxada Pegada Neutra'},
-    {id:'remada-curv-barra', name:'Remada Curvada c/ Barra'},
-    {id:'puxada-aberta', name:'Puxada Aberta'},
-    {id:'remada-baixa-cabo', name:'Remada Baixa no Cabo'},
-    {id:'cadeira-ext', name:'Cadeira Extensora'},
-    {id:'paralelas', name:'Paralelas'},
-    {id:'remada-curv-b2', name:'Remada Curvada (C)'},
+    {id:'front-squat',      name:'Front Squat'},
+    {id:'puxada-neutra',    name:'Puxada Pegada Neutra'},
+    {id:'remada-curv-barra',name:'Remada Curvada c/ Barra'},
+    {id:'puxada-aberta',    name:'Puxada Aberta'},
+    {id:'remada-baixa-cabo',name:'Remada Baixa no Cabo'},
+    {id:'cadeira-ext',      name:'Cadeira Extensora'},
+    {id:'paralelas',        name:'Paralelas'},
+    {id:'remada-curv-b2',   name:'Remada Curvada (C)'},
   ];
 
-  function renderHistorico() {
-    const log = getLog();
+  window.renderHistorico = async function() {
     const cont = document.getElementById('hist-content');
-    const comDados = ALL_EXERCISES.filter(ex => log[ex.id] && log[ex.id].length > 0);
+    cont.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">carregando...</div>`;
+
+    const results = await Promise.all(ALL_EXERCISES.map(async ex => ({
+      ...ex, entries: await getEntries(ex.id)
+    })));
+
+    const comDados = results.filter(ex => ex.entries.length > 0);
 
     if (comDados.length === 0) {
       cont.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;">Nenhum registro ainda.<br><br>Registre o peso nos treinos.</div>`;
@@ -884,14 +947,14 @@
 
     let html = '';
     comDados.forEach(ex => {
-      const entries = log[ex.id];
+      const { entries } = ex;
       const ultimo = entries[entries.length - 1];
-      const max = Math.max(...entries.map(e => e.peso));
+      const max    = Math.max(...entries.map(e => e.peso));
       const w = 120, h = 36, pad = 4;
-      const pesos = entries.map(e => e.peso);
-      const minP = Math.min(...pesos), maxP = Math.max(...pesos);
-      const range = maxP - minP || 1;
-      const pts = pesos.map((p, i) => {
+      const pesos  = entries.map(e => e.peso);
+      const minP   = Math.min(...pesos), maxP = Math.max(...pesos);
+      const range  = maxP - minP || 1;
+      const pts    = pesos.map((p, i) => {
         const x = pad + (i / Math.max(pesos.length - 1, 1)) * (w - pad * 2);
         const y = h - pad - ((p - minP) / range) * (h - pad * 2);
         return `${x},${y}`;
@@ -924,8 +987,14 @@
     });
 
     cont.innerHTML = html;
+  };
+
+  // ── INIT ──────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
   }
 
+  initFirebase();
   renderHints();
 </script>
 
