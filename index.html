@@ -402,6 +402,144 @@
   .hist-stat-val   { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
   .hist-stat-date  { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
+  /* ROADMAP */
+  .roadmap-wrap { padding: 16px 16px 80px; }
+
+  .roadmap-intro {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 24px;
+  }
+  .roadmap-intro-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .roadmap-intro-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .roadmap-intro-sub { font-size: 12px; color: var(--muted); }
+
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 8px; bottom: 8px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  .tl-item { position: relative; margin-bottom: 8px; }
+
+  .tl-dot {
+    position: absolute;
+    left: -24px;
+    top: 16px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--black);
+    z-index: 1;
+  }
+  .tl-dot.fase1   { border-color: var(--accent);  background: rgba(200,241,53,0.2); }
+  .tl-dot.ferias  { border-color: var(--muted);   background: var(--black); }
+  .tl-dot.fase2   { border-color: var(--orange);  background: rgba(255,140,66,0.2); }
+  .tl-dot.fase3   { border-color: var(--blue);    background: rgba(77,159,255,0.2); }
+  .tl-dot.m1      { border-color: var(--purple);  background: rgba(181,122,255,0.3); width:18px; height:18px; left:-26px; top:14px; }
+  .tl-dot.m2      { border-color: #FFD700;        background: rgba(255,215,0,0.3);   width:18px; height:18px; left:-26px; top:14px; }
+
+  .tl-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .tl-card.fase1  { border-left: 3px solid var(--accent); }
+  .tl-card.fase2  { border-left: 3px solid var(--orange); }
+  .tl-card.fase3  { border-left: 3px solid var(--blue); }
+  .tl-card.ferias { border-left: 3px solid var(--muted); opacity: 0.6; }
+  .tl-card.m1     { border-left: 3px solid var(--purple); background: rgba(181,122,255,0.06); }
+  .tl-card.m2     { border-left: 3px solid #FFD700; background: rgba(255,215,0,0.06); }
+  .tl-card.atual  { box-shadow: 0 0 0 1.5px var(--accent); }
+
+  .tl-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .tl-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .tl-card.m1 .tl-title { color: var(--purple); }
+  .tl-card.m2 .tl-title { color: #FFD700; }
+
+  .tl-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tl-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .tag-musculacao { background: var(--accent-dim);  color: var(--accent); }
+  .tag-corrida    { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+  .tag-natacao    { background: var(--purple-dim);  color: var(--purple); }
+  .tag-bike       { background: var(--orange-dim);  color: var(--orange); }
+  .tag-pausa      { background: rgba(100,100,100,0.1); color: var(--muted); }
+  .tag-atual      { background: var(--accent); color: var(--black); }
+
+  .tl-atual-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--black);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .roadmap-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .roadmap-meta-item { text-align: center; }
+  .roadmap-meta-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .roadmap-meta-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
   footer {
     border-top: 1px solid var(--border);
     padding: 12px 16px;
@@ -454,8 +592,8 @@
     <div class="week-row corrida" data-day="qua">
       <div class="week-day">Qua</div>
       <div class="week-info">
-        <div class="week-activity">Corrida Intensidade</div>
-        <div class="week-detail">Intervalos ou tempo run</div>
+        <div class="week-activity">Corrida de Intensidade</div>
+        <div class="week-detail">Runna · Intervalos ou tempo run</div>
       </div>
       <span class="week-badge badge-run">CORRIDA</span>
     </div>
@@ -471,7 +609,7 @@
       <div class="week-day">Sex</div>
       <div class="week-info">
         <div class="week-activity">Corrida Leve</div>
-        <div class="week-detail">Z2 · Ritmo confortável</div>
+        <div class="week-detail">Runna · Z2 · Ritmo confortável</div>
       </div>
       <span class="week-badge badge-run">CORRIDA</span>
     </div>
@@ -487,7 +625,7 @@
       <div class="week-day">Dom</div>
       <div class="week-info">
         <div class="week-activity">Long Run</div>
-        <div class="week-detail">Z2 · Treino mais longo da semana</div>
+        <div class="week-detail">Runna · Z2 · Treino mais longo da semana</div>
       </div>
       <span class="week-badge badge-run">CORRIDA</span>
     </div>
@@ -563,10 +701,10 @@
         <tr data-ex="back-squat"><td class="ex-num">1</td><td><div class="ex-name">Back Squat</div></td><td class="ex-dose">4 × 4–6</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
         <tr data-ex="rdl-barra"><td class="ex-num">2</td><td><div class="ex-name">RDL com Barra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
         <tr data-ex="supino-inc-halt"><td class="ex-num">3</td><td><div class="ex-name">Supino Inclinado com Halteres</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
-        <tr data-ex="desenv-halt"><td class="ex-num">4</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
-        <tr data-ex="crucifixo-cabo"><td class="ex-num">5</td><td><div class="ex-name">Crucifixo no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
-        <tr data-ex="elev-lat-cabo"><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
-        <tr data-ex="remada-alta-cabo"><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+        <tr data-ex="desenv-halt"><td class="ex-num">4</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="crucifixo-cabo"><td class="ex-num">5</td><td><div class="ex-name">Crucifixo no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+        <tr data-ex="elev-lat-cabo"><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+        <tr data-ex="remada-alta-cabo"><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
       </tbody>
     </table>
     <div class="time-badge">⏱ Tempo total <span>~60 min</span></div>
@@ -592,9 +730,9 @@
         <tr data-ex="front-squat"><td class="ex-num">2</td><td><div class="ex-name">Front Squat</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
         <tr data-ex="puxada-neutra"><td class="ex-num">3</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
         <tr data-ex="remada-curv-barra"><td class="ex-num">4</td><td><div class="ex-name">Remada Curvada com Barra</div></td><td class="ex-dose">4 × 6–8</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
-        <tr data-ex="puxada-aberta"><td class="ex-num">5</td><td><div class="ex-name">Puxada Aberta</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
-        <tr data-ex="remada-baixa-cabo"><td class="ex-num">6</td><td><div class="ex-name">Remada Baixa no Cabo</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
-        <tr data-ex="cadeira-ext"><td class="ex-num">7</td><td><div class="ex-name">Cadeira Extensora</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+        <tr data-ex="puxada-aberta"><td class="ex-num">5</td><td><div class="ex-name">Puxada Aberta</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="remada-baixa-cabo"><td class="ex-num">6</td><td><div class="ex-name">Remada Baixa no Cabo</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="cadeira-ext"><td class="ex-num">7</td><td><div class="ex-name">Cadeira Extensora</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
       </tbody>
     </table>
     <div class="time-badge">⏱ Tempo total <span>~55 min</span></div>
@@ -611,12 +749,12 @@
       <thead><tr><th></th><th>Exercício</th><th style="text-align:center">Séries × Reps</th><th>Falha</th></tr></thead>
       <tbody>
         <tr data-ex="supino-inc-halt"><td class="ex-num">1</td><td><div class="ex-name">Supino Inclinado com Halteres</div></td><td class="ex-dose">4 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
-        <tr data-ex="paralelas"><td class="ex-num">2</td><td><div class="ex-name">Paralelas</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
-        <tr data-ex="desenv-halt"><td class="ex-num">3</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
-        <tr data-ex="puxada-neutra"><td class="ex-num">4</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Últ. série opt.</td></tr>
+        <tr data-ex="paralelas"><td class="ex-num">2</td><td><div class="ex-name">Paralelas</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="desenv-halt"><td class="ex-num">3</td><td><div class="ex-name">Desenvolvimento com Halteres</div></td><td class="ex-dose">3 × 10–12</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
+        <tr data-ex="puxada-neutra"><td class="ex-num">4</td><td><div class="ex-name">Puxada Pegada Neutra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-opt">Última série — opcional</td></tr>
         <tr data-ex="remada-curv-b2"><td class="ex-num">5</td><td><div class="ex-name">Remada Curvada com Barra</div></td><td class="ex-dose">3 × 8–10</td><td class="ex-fail fail-rir">RIR 1–2</td></tr>
-        <tr data-ex="elev-lat-cabo"><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
-        <tr data-ex="remada-alta-cabo"><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Últ. série falha</td></tr>
+        <tr data-ex="elev-lat-cabo"><td class="ex-num">6</td><td><div class="ex-name">Elevação Lateral no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
+        <tr data-ex="remada-alta-cabo"><td class="ex-num">7</td><td><div class="ex-name">Remada Alta no Cabo</div></td><td class="ex-dose">3 × 12–15</td><td class="ex-fail fail-go">Última série — falha</td></tr>
       </tbody>
     </table>
     <div class="time-badge">⏱ Tempo total <span>~55 min</span></div>
@@ -664,6 +802,123 @@
   <div id="hist-content" style="padding:16px 16px 80px;"></div>
 </div>
 
+<!-- ROADMAP SCREEN -->
+<div id="screen-roadmap" class="screen">
+  <header>
+    <span class="tag">Projeto LS · Road to Iron Man</span>
+    <h1>Roadmap <span>2026 → 2028</span></h1>
+  </header>
+
+  <div class="roadmap-wrap">
+
+    <!-- INTRO -->
+    <div class="roadmap-intro">
+      <div class="roadmap-intro-label">A missão</div>
+      <div class="roadmap-intro-title">Iron Man 70.3 — Janeiro 2028</div>
+      <div class="roadmap-intro-sub">1,9km natação · 90km bike · 21,1km corrida</div>
+      <div class="roadmap-meta">
+        <div class="roadmap-meta-item">
+          <div class="roadmap-meta-val">3</div>
+          <div class="roadmap-meta-label">Fases</div>
+        </div>
+        <div class="roadmap-meta-item">
+          <div class="roadmap-meta-val">2</div>
+          <div class="roadmap-meta-label">Milestones</div>
+        </div>
+        <div class="roadmap-meta-item">
+          <div class="roadmap-meta-val">~19</div>
+          <div class="roadmap-meta-label">Meses</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline">
+
+      <!-- FASE 1 -->
+      <div class="tl-item">
+        <div class="tl-dot fase1"></div>
+        <div class="tl-card fase1 atual">
+          <div class="tl-atual-badge">● você está aqui</div>
+          <div class="tl-date">Julho 2026 → Novembro 2026</div>
+          <div class="tl-title">Fase 1 — Força, Corrida e Natação</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Construção da base aeróbica, introdução à natação com assessoria no mar, musculação 3x/semana. Meta: 1.500m contínuos na natação.</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-musculacao">Musculação</span>
+            <span class="tl-tag tag-corrida">Corrida</span>
+            <span class="tl-tag tag-natacao">Natação</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FÉRIAS -->
+      <div class="tl-item">
+        <div class="tl-dot ferias"></div>
+        <div class="tl-card ferias">
+          <div class="tl-date">Agosto 2026</div>
+          <div class="tl-title">Férias</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Pausa planejada. Retorno fim de agosto.</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-pausa">Pausa</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FASE 2 -->
+      <div class="tl-item">
+        <div class="tl-dot fase2"></div>
+        <div class="tl-card fase2">
+          <div class="tl-date">Dezembro 2026 → Setembro 2027</div>
+          <div class="tl-title">Fase 2 — Força, Corrida, Natação e Bike</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Entrada da bike após atingir 1.500m contínuos na natação. Primeiro Sprint, depois Olímpico. Brick treinos (bike + corrida).</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-musculacao">Musculação</span>
+            <span class="tl-tag tag-corrida">Corrida</span>
+            <span class="tl-tag tag-natacao">Natação</span>
+            <span class="tl-tag tag-bike">Bike</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MILESTONE 1 -->
+      <div class="tl-item">
+        <div class="tl-dot m1"></div>
+        <div class="tl-card m1">
+          <div class="tl-date">Julho / Agosto 2027 · Data a definir</div>
+          <div class="tl-title">🏁 Milestone 1 — Triathlon Olímpico</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">1,5km natação · 40km bike · 10km corrida. Primeira prova de distância olímpica.</div>
+        </div>
+      </div>
+
+      <!-- FASE 3 -->
+      <div class="tl-item">
+        <div class="tl-dot fase3"></div>
+        <div class="tl-card fase3">
+          <div class="tl-date">Outubro 2027 → Janeiro 2028</div>
+          <div class="tl-title">Fase 3 — Prep Iron Man 70.3</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Pico de volume, simulações de prova completa, ajuste fino de nutrição e tapering para o dia da corrida.</div>
+          <div class="tl-tags">
+            <span class="tl-tag tag-corrida">Corrida</span>
+            <span class="tl-tag tag-natacao">Natação</span>
+            <span class="tl-tag tag-bike">Bike</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MILESTONE 2 -->
+      <div class="tl-item">
+        <div class="tl-dot m2"></div>
+        <div class="tl-card m2">
+          <div class="tl-date">Janeiro 2028</div>
+          <div class="tl-title">🏆 Milestone 2 — Iron Man 70.3</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">1,9km natação · 90km bike · 21,1km corrida. Fim do Projeto LS. Linha de chegada.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="nav-btn active" onclick="showScreen('grade',this)">
@@ -674,6 +929,9 @@
   </button>
   <button class="nav-btn" onclick="showScreen('historico',this);renderHistorico()">
     <span class="icon">📈</span><span>Evolução</span>
+  </button>
+  <button class="nav-btn" onclick="showScreen('roadmap',this)">
+    <span class="icon">🗺️</span><span>Roadmap</span>
   </button>
 </div>
 
