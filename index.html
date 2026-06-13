@@ -919,6 +919,17 @@
   </div>
 </div>
 
+<!-- BANNER LOGIN -->
+<div id="login-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;background:#1a1a1a;border:1px solid rgba(200,241,53,0.3);border-radius:12px;padding:14px 16px;z-index:150;align-items:center;gap:12px;">
+  <div style="flex:1;">
+    <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Histórico offline</div>
+    <div style="font-size:12px;color:var(--text);">Entre com Google para sincronizar</div>
+  </div>
+  <button onclick="fazerLogin()" style="background:var(--accent);color:var(--black);border:none;border-radius:8px;padding:8px 14px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">
+    ENTRAR
+  </button>
+</div>
+
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="nav-btn active" onclick="showScreen('grade',this)">
@@ -985,18 +996,23 @@
         if (user) {
           userId = user.uid;
           setSyncStatus('online');
+          document.getElementById('login-banner').style.display = 'none';
           await migrateLocalToFirebase();
           renderHints();
         } else {
-          setSyncStatus('login');
-          const provider = new GoogleAuthProvider();
-          try {
-            await signInWithRedirect(auth, provider);
-          } catch(e) {
-            setSyncStatus('local');
-          }
+          setSyncStatus('local');
+          document.getElementById('login-banner').style.display = 'flex';
         }
       });
+
+      window.fazerLogin = async function() {
+        const provider = new GoogleAuthProvider();
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch(e) {
+          console.warn('Login falhou', e);
+        }
+      };
     } catch(e) {
       console.warn('Firebase não disponível, usando localStorage.', e);
       setSyncStatus('local');
