@@ -1579,6 +1579,9 @@
         <button class="btn-analyze" id="btn-analyze" onclick="gerarAnalise()">
           ⚡ ANALISAR MEUS TREINOS
         </button>
+        <button onclick="localStorage.removeItem('ia_analysis');renderIA();" style="width:100%;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px;font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;margin-bottom:12px;touch-action:manipulation;">
+          LIMPAR CACHE E TENTAR NOVAMENTE
+        </button>
         <div id="ia-result">
           ${saved && (agora - saved.timestamp) < 6 * 3600 * 1000
             ? `<div class="ia-analysis">${saved.text}</div><div class="ia-timestamp">Análise gerada em ${new Date(saved.timestamp).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>`
