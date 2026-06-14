@@ -638,6 +638,126 @@
     letter-spacing: 0.08em;
   }
 
+  /* DETALHE ATIVIDADE */
+  .detail-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .detail-sheet {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px 40px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .detail-handle {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .detail-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .detail-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .detail-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .detail-stat-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+  .detail-stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .zones-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .zone-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .zone-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    width: 24px;
+    flex-shrink: 0;
+  }
+  .zone-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .zone-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .zone-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .zone-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .zona-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+
   /* STRAVA */
   .strava-connect {
     background: var(--card);
@@ -1130,15 +1250,6 @@
   </div>
 </div>
 
-<!-- ANÁLISE IA SCREEN -->
-<div id="screen-ia" class="screen">
-  <header>
-    <span class="tag">Projeto LS · Inteligência</span>
-    <h1>Análise <span>IA</span></h1>
-  </header>
-  <div id="ia-content" style="padding:16px 16px 80px;"></div>
-</div>
-
 <!-- STRAVA SCREEN -->
 <div id="screen-strava" class="screen">
   <header>
@@ -1146,6 +1257,14 @@
     <h1>Strava <span>Connect</span></h1>
   </header>
   <div id="strava-content" style="padding:16px 16px 80px;"></div>
+</div>
+
+<!-- DETALHE ATIVIDADE -->
+<div id="detail-overlay" class="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-sheet">
+    <div class="detail-handle"></div>
+    <div id="detail-content"></div>
+  </div>
 </div>
 
 <!-- BANNER LOGIN -->
@@ -1178,9 +1297,6 @@
   </button>
   <button class="nav-btn" onclick="showScreen('strava',this);renderStrava()">
     <span class="icon">🟠</span><span>Strava</span>
-  </button>
-  <button class="nav-btn" onclick="showScreen('ia',this);renderIA()">
-    <span class="icon">🤖</span><span>IA</span>
   </button>
   <button class="nav-btn" onclick="showScreen('roadmap',this)">
     <span class="icon">🗺️</span><span>Mapa</span>
@@ -1649,6 +1765,173 @@
     btn.textContent = '⚡ ANALISAR MEUS TREINOS';
   };
 
+  // ── DETALHE DE ATIVIDADE ──────────────────────
+  const ZONE_COLORS = ['#aaa', '#4d9fff', '#C8F135', '#FF8C42', '#ff6b6b'];
+  const ZONE_NAMES  = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5'];
+  const ZONE_FC     = ['<140', '140–160', '161–174', '175–187', '>187'];
+
+  window.closeDetail = function() {
+    document.getElementById('detail-overlay').style.display = 'none';
+  };
+
+  window.openDetail = async function(actId, actData) {
+    const overlay = document.getElementById('detail-overlay');
+    const cont    = document.getElementById('detail-content');
+    overlay.style.display = 'flex';
+
+    const dataFormatada = new Date(actData.start_date_local).toLocaleDateString('pt-BR', {
+      weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
+    });
+
+    cont.innerHTML = `
+      <div class="detail-title">${actData.name}</div>
+      <div class="detail-date">${dataFormatada}</div>
+      <div class="detail-stats">
+        <div class="detail-stat">
+          <div class="detail-stat-val">${formatDist(actData.distance)}</div>
+          <div class="detail-stat-label">Distância</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-val">${formatTime(actData.moving_time)}</div>
+          <div class="detail-stat-label">Tempo</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-val">${actData.average_heartrate ? Math.round(actData.average_heartrate)+'bpm' : '—'}</div>
+          <div class="detail-stat-label">FC Média</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-val">${actData.max_heartrate ? Math.round(actData.max_heartrate)+'bpm' : '—'}</div>
+          <div class="detail-stat-label">FC Máx</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-val">${formatPace(actData.average_speed, actData.type)}</div>
+          <div class="detail-stat-label">Ritmo</div>
+        </div>
+        <div class="detail-stat">
+          <div class="detail-stat-val">${actData.total_elevation_gain ? actData.total_elevation_gain+'m' : '—'}</div>
+          <div class="detail-stat-label">Elevação</div>
+        </div>
+      </div>
+      <div class="zones-title">Carregando zonas de FC...</div>
+      <div id="zones-content"></div>`;
+
+    // Busca zonas
+    try {
+      const token   = await getValidToken();
+      const res     = await fetch(`${WORKER_URL}/zones/${actId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data    = await res.json();
+      const hrZones = data.find ? data.find(z => z.type === 'heartrate') : null;
+
+      if (!hrZones || !hrZones.distribution_buckets) {
+        document.querySelector('.zones-title').textContent = 'Zonas de FC não disponíveis';
+        return;
+      }
+
+      const buckets   = hrZones.distribution_buckets;
+      const totalSecs = buckets.reduce((s, b) => s + b.time, 0);
+
+      // Zona predominante
+      const maxBucket = buckets.reduce((a, b) => b.time > a.time ? b : a, buckets[0]);
+      const maxIdx    = buckets.indexOf(maxBucket);
+      const zonaPred  = ZONE_NAMES[maxIdx];
+      const zonaColor = ZONE_COLORS[maxIdx];
+
+      document.querySelector('.zones-title').innerHTML = `
+        Zonas de Frequência Cardíaca
+        <span class="zona-badge" style="background:${zonaColor}22;color:${zonaColor};border:1px solid ${zonaColor}44;">
+          ${zonaPred} predominante
+        </span>`;
+
+      const zonesHTML = buckets.map((b, i) => {
+        const pct = totalSecs > 0 ? Math.round((b.time / totalSecs) * 100) : 0;
+        const min = Math.floor(b.time / 60);
+        const sec = b.time % 60;
+        const timeStr = min > 0 ? `${min}m${String(sec).padStart(2,'0')}s` : `${sec}s`;
+        return `
+          <div class="zone-row">
+            <div class="zone-label" style="color:${ZONE_COLORS[i]}">${ZONE_NAMES[i]}</div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);">${ZONE_FC[i]} bpm</span>
+              </div>
+              <div class="zone-bar-wrap">
+                <div class="zone-bar" style="width:${pct}%;background:${ZONE_COLORS[i]};"></div>
+              </div>
+            </div>
+            <div class="zone-time">${timeStr}</div>
+            <div class="zone-pct" style="color:${ZONE_COLORS[i]}">${pct}%</div>
+          </div>`;
+      }).join('');
+
+      document.getElementById('zones-content').innerHTML = zonesHTML;
+
+    } catch(e) {
+      document.querySelector('.zones-title').textContent = 'Erro ao carregar zonas.';
+    }
+  };
+
+  // ── CHECK TREINO DO DIA ───────────────────────
+  // Mapeia dia da semana para tipo de atividade esperada
+  const TREINO_DO_DIA = {
+    'seg': { tipo: ['WeightTraining', 'Workout'], label: 'Treino A' },
+    'ter': { tipo: ['Swim'], label: 'Natação' },
+    'qua': { tipo: ['Run'], label: 'Corrida de Intensidade' },
+    'qui': { tipo: ['Swim', 'WeightTraining', 'Workout'], label: 'Natação + Treino B' },
+    'sex': { tipo: ['Run'], label: 'Corrida Leve' },
+    'sab': { tipo: ['WeightTraining', 'Workout'], label: 'Treino C' },
+    'dom': { tipo: ['Run'], label: 'Long Run' },
+  };
+
+  async function checkTreinosDia() {
+    const tokens = getStravaTokens();
+    if (!tokens) return;
+
+    const token = await getValidToken();
+    if (!token) return;
+
+    try {
+      // Pega atividades das últimas 24h
+      const ontemTimestamp = Math.floor((Date.now() - 24 * 3600 * 1000) / 1000);
+      const res = await fetch(`${WORKER_URL}/activities?per_page=10&after=${ontemTimestamp}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const activities = await res.json();
+      if (!Array.isArray(activities)) return;
+
+      // Para cada dia da semana, verifica se tem atividade correspondente hoje
+      const hojeMap = {1:'seg',2:'ter',3:'qua',4:'qui',5:'sex',6:'sab',0:'dom'};
+      const hoje = hojeMap[new Date().getDay()];
+      const treinoEsperado = TREINO_DO_DIA[hoje];
+      if (!treinoEsperado) return;
+
+      const feito = activities.some(a => {
+        const dataAtiv = new Date(a.start_date_local);
+        const isHoje = dataAtiv.toDateString() === new Date().toDateString();
+        return isHoje && treinoEsperado.tipo.includes(a.type);
+      });
+
+      if (feito) {
+        const row = document.querySelector(`.week-row[data-day="${hoje}"]`);
+        if (row) {
+          // Adiciona badge de concluído
+          const existing = row.querySelector('.done-badge');
+          if (!existing) {
+            const badge = document.createElement('div');
+            badge.className = 'done-badge';
+            badge.innerHTML = '✅';
+            badge.style.cssText = 'position:absolute;top:-9px;right:14px;font-size:14px;';
+            row.style.position = 'relative';
+            row.appendChild(badge);
+          }
+        }
+      }
+    } catch(e) {
+      console.warn('Erro ao verificar treinos do dia:', e);
+    }
+  }
+
   // ── STRAVA ────────────────────────────────────
   const WORKER_URL = 'https://strava-proxy.serrano1888948.workers.dev';
 
@@ -1783,7 +2066,7 @@
       }
 
       const html = activities.map(a => `
-        <div class="activity-card ${activityTypeClass(a.type)}">
+        <div class="activity-card ${activityTypeClass(a.type)}" onclick="openDetail(${a.id}, ${JSON.stringify(a).replace(/"/g, '&quot;')})" style="cursor:pointer;">
           <div class="activity-icon">${activityIcon(a.type)}</div>
           <div class="activity-info">
             <div class="activity-name">${a.name}</div>
@@ -1795,6 +2078,7 @@
               ${a.average_heartrate ? `<div class="activity-stat">${Math.round(a.average_heartrate)}bpm <span>FC</span></div>` : ''}
             </div>
           </div>
+          <div style="color:var(--muted);font-size:16px;">›</div>
         </div>`).join('');
 
       document.getElementById('activities-list').innerHTML = html;
@@ -1813,6 +2097,7 @@
 
   initFirebase();
   renderHints();
+  checkTreinosDia();
 </script>
 
 <!-- MODAL REGISTRO -->
